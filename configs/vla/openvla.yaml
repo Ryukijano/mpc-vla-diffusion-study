@@ -1,0 +1,50 @@
+# =============================================================================
+# OpenVLA Inference Configuration
+# =============================================================================
+# OpenVLA-7B is used for INFERENCE ONLY on the GB10 (128 GB unified memory).
+# Fine-tuning the 7B model is not feasible in the study's compute budget.
+#
+# The wrapper (vla_baselines.openvla_wrapper.OpenVLAInference) loads the model
+# lazily on the first predict_action() call.  If the model cannot be loaded
+# (offline, OOM, HF Hub unreachable), it enters stub mode and returns zero
+# actions — see the wrapper docstring for details.
+
+# ---------------------------------------------------------------------------
+# Model
+# ---------------------------------------------------------------------------
+model:
+  name: "openvla/openvla-7b"
+  # 8-bit quantisation — recommended for GB10's 128 GB unified memory.
+  # Set to false for full precision (requires ~14 GB VRAM).
+  load_in_8bit: true
+  # HuggingFace device_map strategy.  "auto" spreads across available devices.
+  device_map: "auto"
+  # Required for OpenVLA remote code execution.
+  trust_remote_code: true
+  # Action dimension for stub-mode fallback (7-DoF for common robot arms).
+  action_dim: 7
+  # Optional HuggingFace cache directory override (null = use HF_HOME env).
+  cache_dir: null
+
+# ---------------------------------------------------------------------------
+# Inference
+# ---------------------------------------------------------------------------
+inference:
+  # Whether to sample during generation (false = deterministic greedy).
+  do_sample: false
+  # Maximum generated tokens per action prediction.
+  max_new_tokens: 100
+  # Dataset-specific unnormalisation key (null = use model default).
+  unnorm_key: null
+
+# ---------------------------------------------------------------------------
+# Device
+# ---------------------------------------------------------------------------
+device: "auto"  # "auto", "cuda", or "cpu"
+
+# ---------------------------------------------------------------------------
+# Latency tracking
+# ---------------------------------------------------------------------------
+# The wrapper records last_latency_ms after each forward pass.
+# Set to true to also log per-call latency at INFO level.
+log_latency: false

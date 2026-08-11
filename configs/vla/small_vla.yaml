@@ -1,0 +1,101 @@
+# =============================================================================
+# SmallVLA Configuration
+# =============================================================================
+# SmallVLA is a lightweight Vision-Language-Action model designed to be
+# compute-matched with the diffusion policies in the comparison study.
+# It is fully trainable on the GB10 with the mpc_vla conda env.
+#
+# Architecture:
+#   - Vision encoder: SmallViT (patch16, 224) ~86M params
+#   - Language encoder: TextEncoder (CLIP or BoW fallback)
+#   - Fusion: concat + MLP
+#   - Action head: MLP -> (horizon, action_dim)
+
+# ---------------------------------------------------------------------------
+# Model architecture
+# ---------------------------------------------------------------------------
+model:
+  action_dim: 7        # dimensionality of the action vector per timestep
+  horizon: 4           # number of future timesteps to predict
+  hidden_dim: 256      # fusion MLP and action head hidden dimension
+  num_layers: 4        # number of layers in the action head MLP
+  img_size: 224        # input image size (square)
+  text_backend: "auto" # "auto" (CLIP->BoW), "clip", or "bow"
+  text_model_name: "openai/clip-vit-base-patch32"
+  device: "auto"       # "auto", "cuda", or "cpu"
+
+# ---------------------------------------------------------------------------
+# Training (VLATrainer)
+# ---------------------------------------------------------------------------
+training:
+  lr: 1.0e-4           # initial learning rate (Adam)
+  weight_decay: 1.0e-5 # Adam weight decay
+  epochs: 50           # maximum number of training epochs
+  batch_size: 32       # mini-batch size
+  val_split: 0.1       # fraction of demos held out for validation
+
+  # Learning-rate scheduler
+  scheduler:
+    type: "cosine"     # "cosine" or "step"
+    # cosine params
+    eta_min: 0.0       # minimum LR at end of cosine annealing
+    # step params (used if type="step")
+    step_size: 30      # decay LR every N epochs
+    gamma: 0.1         # decay factor
+
+  # Early stopping
+  early_stopping:
+    patience: 10       # epochs with no val improvement before stopping
+    min_delta: 1.0e-5  # minimum val-loss decrease to count as improvement
+
+  # Gradient clipping (max norm; 0 disables)
+  grad_clip: 1.0
+
+  # Reproducibility
+  seed: 42
+  shuffle: true
+
+# ---------------------------------------------------------------------------
+# Checkpointing
+# ---------------------------------------------------------------------------
+checkpoint:
+  # Directory for saving checkpoints (relative to study root).
+  dir: "results/checkpoints/small_vla"
+  # Save best model (lowest val loss) separately.
+  save_best: true
+
+# ---------------------------------------------------------------------------
+# Optional wandb logging
+# ---------------------------------------------------------------------------
+wandb:
+  enabled: false
+  project: "mpc_vla_diffusion_study"
+  run_name: "small_vla"
+
+# ---------------------------------------------------------------------------
+# Network-size presets (override the model section above)
+# ---------------------------------------------------------------------------
+presets:
+  # Small: for quick smoke tests (< 2 min on GB10)
+  small:
+    hidden_dim: 32
+    num_layers: 2
+    img_size: 64
+    epochs: 30
+    batch_size: 16
+
+  # Medium: for full experiments
+  medium:
+    hidden_dim: 128
+    num_layers: 3
+    img_size: 128
+    epochs: 100
+    batch_size: 64
+
+  # Large: for paper-quality results
+  large:
+    hidden_dim: 256
+    num_layers: 4
+    img_size: 224
+    epochs: 200
+    batch_size: 128

@@ -1,0 +1,75 @@
+# =============================================================================
+# PushT Benchmark Configuration
+# =============================================================================
+# T-shaped block pushing task (Chi et al., 2023).
+# A point agent pushes a T-shaped block on a 2-D plane towards a target pose.
+# Success is measured by IoU between the block and the target outline.
+
+# ---------------------------------------------------------------------------
+# Environment
+# ---------------------------------------------------------------------------
+env:
+  class: "PushTEnv"
+  module: "benchmarks.pusht_env"
+  params:
+    block_size: 1.0
+    agent_radius: 0.15
+    success_iou_threshold: 0.6
+    max_steps: 200
+    image_size: 96
+    workspace: 10.0
+    seed: 0
+
+# ---------------------------------------------------------------------------
+# Observation / action spaces
+# ---------------------------------------------------------------------------
+spaces:
+  observation_dim: 5          # [block_x, block_y, block_angle, agent_x, agent_y]
+  action_dim: 2               # [agent_dx, agent_dy]
+  image_shape: [96, 96, 3]
+
+# ---------------------------------------------------------------------------
+# Task metadata
+# ---------------------------------------------------------------------------
+task:
+  name: "PushT"
+  description: "T-shaped block pushing task (multi-modal solutions)"
+  multimodal: true
+  language_instruction: "Push the T-shaped block onto the target T outline."
+
+# ---------------------------------------------------------------------------
+# Evaluation
+# ---------------------------------------------------------------------------
+evaluation:
+  n_episodes: 50
+  seeds: [0, 1, 2, 42, 123]
+  metrics:
+    - "success_rate"
+    - "mean_return"
+    - "path_length"
+    - "collision_rate"
+    - "mean_inference_latency"
+
+# ---------------------------------------------------------------------------
+# Demonstration collection
+# ---------------------------------------------------------------------------
+demonstrations:
+  n_demos: 100
+  max_steps: 200
+  expert: "builtin"           # uses PushTEnv.generate_expert_demonstrations
+  save_path: "data/pusht_demos.npz"
+
+# ---------------------------------------------------------------------------
+# Controller-specific settings
+# ---------------------------------------------------------------------------
+controllers:
+  mpc:
+    horizon: 15
+    control_bounds: [-1.0, 1.0]
+  vla:
+    image_size: 96
+    instruction: "Push the T-shaped block onto the target T outline."
+  diffusion:
+    observation_dim: 5
+    action_dim: 2
+    diffusion_steps: 100

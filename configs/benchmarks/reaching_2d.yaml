@@ -1,0 +1,76 @@
+# =============================================================================
+# 2D Reaching Benchmark Configuration (no obstacles)
+# =============================================================================
+# A 2-D point mass must reach a target position using double-integrator
+# dynamics.  No obstacles are present in this variant.
+
+# ---------------------------------------------------------------------------
+# Environment
+# ---------------------------------------------------------------------------
+env:
+  class: "ReachingEnv"
+  module: "benchmarks.reaching_env"
+  params:
+    dim: 2
+    dt: 0.05
+    success_threshold: 0.1
+    max_steps: 200
+    image_size: 96
+    workspace: 5.0
+    obstacles: []              # no obstacles
+    seed: 0
+
+# ---------------------------------------------------------------------------
+# Observation / action spaces
+# ---------------------------------------------------------------------------
+spaces:
+  observation_dim: 4          # [x, y, vx, vy]
+  action_dim: 2               # [ax, ay]
+  image_shape: [96, 96, 3]
+
+# ---------------------------------------------------------------------------
+# Task metadata
+# ---------------------------------------------------------------------------
+task:
+  name: "Reaching (2D)"
+  description: "2D point-mass reaching without obstacles"
+  multimodal: false
+  language_instruction: "Reach the green target in the plane."
+
+# ---------------------------------------------------------------------------
+# Evaluation
+# ---------------------------------------------------------------------------
+evaluation:
+  n_episodes: 50
+  seeds: [0, 1, 2, 42, 123]
+  metrics:
+    - "success_rate"
+    - "mean_return"
+    - "path_length"
+    - "collision_rate"
+    - "mean_inference_latency"
+
+# ---------------------------------------------------------------------------
+# Demonstration collection
+# ---------------------------------------------------------------------------
+demonstrations:
+  n_demos: 100
+  max_steps: 200
+  expert: "builtin"           # uses ReachingEnv.generate_expert_demonstrations
+  save_path: "data/reaching_2d_demos.npz"
+
+# ---------------------------------------------------------------------------
+# Controller-specific settings
+# ---------------------------------------------------------------------------
+controllers:
+  mpc:
+    horizon: 15
+    dt: 0.05
+    control_bounds: [-1.0, 1.0]
+  vla:
+    image_size: 96
+    instruction: "Reach the green target in the plane."
+  diffusion:
+    observation_dim: 4
+    action_dim: 2
+    diffusion_steps: 100

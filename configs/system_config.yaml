@@ -1,0 +1,190 @@
+# =============================================================================
+# System Configuration for MPC vs VLA vs Diffusion Study
+# =============================================================================
+# Target hardware: NVIDIA DGX Spark (Grace Blackwell GB10)
+# Conda environment: mpc_vla (PyTorch 2.12.0.dev+cu128)
+
+# ---------------------------------------------------------------------------
+# Hardware
+# ---------------------------------------------------------------------------
+hardware:
+  name: "NVIDIA DGX Spark"
+  soc: "Grace Blackwell GB10"
+  unified_memory_gb: 128
+  gpu:
+    name: "Blackwell GPU (GB10)"
+    cuda_version: "12.8"
+    # FP8 / INT8 support for VLA quantized inference
+    supports_fp8: true
+    supports_int8: true
+  cpu:
+    name: "Grace (20-core Arm)"
+    notes: "MPC solvers (OSQP, iLQR, SLSQP) run on CPU cores"
+
+# ---------------------------------------------------------------------------
+# Conda environment
+# ---------------------------------------------------------------------------
+conda:
+  env_name: "mpc_vla"
+  python_version: "3.12"
+  pytorch_version: "2.12.0.dev+cu128"
+  key_packages:
+    - numpy>=2.0
+    - scipy>=1.13
+    - matplotlib>=3.8
+    - pyyaml>=6.0
+    - torch>=2.12
+    - transformers  # for OpenVLA (optional)
+
+# ---------------------------------------------------------------------------
+# Experiment defaults
+# ---------------------------------------------------------------------------
+experiment:
+  default_seeds: [0, 1, 2, 42, 123]
+  default_episodes: 100
+  default_horizon: 15
+  default_max_steps: 60
+  goal_tolerance: 0.2
+  control_bounds: [-5.0, 5.0]
+
+# ---------------------------------------------------------------------------
+# Network sizes
+# ---------------------------------------------------------------------------
+network_sizes:
+  # Small: for quick smoke tests (< 2 min on GB10)
+  small:
+    hidden_dim: 32
+    diffusion_steps: 8
+    training_epochs: 30
+    batch_size: 16
+    learning_rate: 0.01
+    num_demos: 20
+    num_diffusion_samples: 4
+    refine_steps: 3
+    ilqr_iters: 10
+
+  # Medium: for full experiments
+  medium:
+    hidden_dim: 128
+    diffusion_steps: 100
+    training_epochs: 200
+    batch_size: 64
+    learning_rate: 0.001
+    num_demos: 100
+    num_diffusion_samples: 16
+    refine_steps: 5
+    ilqr_iters: 20
+
+  # Large: for paper-quality results (may be slow)
+  large:
+    hidden_dim: 256
+    diffusion_steps: 200
+    training_epochs: 500
+    batch_size: 128
+    learning_rate: 0.0005
+    num_demos: 500
+    num_diffusion_samples: 32
+    refine_steps: 10
+    ilqr_iters: 30
+
+# ---------------------------------------------------------------------------
+# Benchmarks
+# ---------------------------------------------------------------------------
+benchmarks:
+  pusht:
+    name: "PushT"
+    description: "T-shaped block pushing task (multi-modal solutions)"
+    state_dim: 4
+    action_dim: 2
+    max_steps: 60
+    goal_tol: 0.2
+    multimodal: true
+
+  reaching:
+    name: "Reaching"
+    description: "2D point-mass reaching with obstacles"
+    state_dim: 4
+    action_dim: 2
+    max_steps: 60
+    goal_tol: 0.2
+    obstacles:
+      - {center: [2.0, 2.0], radius: 0.5}
+      - {center: [3.0, 1.0], radius: 0.4}
+    multimodal: false
+
+  reaching_cluttered:
+    name: "Reaching (Cluttered)"
+    description: "2D point-mass reaching with dense obstacles"
+    state_dim: 4
+    action_dim: 2
+    max_steps: 80
+    goal_tol: 0.2
+    obstacles:
+      - {center: [1.5, 1.5], radius: 0.4}
+      - {center: [2.5, 2.5], radius: 0.5}
+      - {center: [3.0, 1.0], radius: 0.35}
+      - {center: [1.0, 3.0], radius: 0.3}
+      - {center: [3.5, 3.0], radius: 0.3}
+    multimodal: true
+
+# ---------------------------------------------------------------------------
+# Controller families
+# ---------------------------------------------------------------------------
+controllers:
+  mpc:
+    - "Linear MPC"
+    - "Nonlinear MPC (iLQR)"
+    - "Collision-Free MPC"
+    - "Diffusion Warm-Start MPC"
+
+  vla:
+    - "OpenVLA"
+    - "SmallVLA"
+
+  diffusion:
+    - "DDPM Policy"
+    - "Flow Matching Policy"
+    - "MIP (Minimal Iterative Policy)"
+    - "Regression Policy"
+    - "Iterative Regression Policy"
+
+# ---------------------------------------------------------------------------
+# Output directories (relative to study root)
+# ---------------------------------------------------------------------------
+output:
+  results_dir: "results"
+  figures_dir: "figures"
+  tables_dir: "results/tables"
+  logs_dir: "results/logs"
+  metrics_dir: "results/metrics"
+  ablation_dir: "experiments/EXP-001-mechanism-ablation/outputs"
+  data_dir: "data"
+
+# ---------------------------------------------------------------------------
+# Module paths (relative to study root)
+# ---------------------------------------------------------------------------
+modules:
+  mpc_baselines_repo: "mpc_baselines_repo"
+  vla_baselines: "vla_baselines"
+  diffusion_baselines: "diffusion_baselines"
+  benchmarks: "benchmarks"
+
+# ---------------------------------------------------------------------------
+# Ablation: EXP-001 GCP component ablation
+# ---------------------------------------------------------------------------
+ablation_exp001:
+  name: "EXP-001: GCP Component Ablation"
+  description: "Isolates the contribution of iterative compute, noise injection, and multi-step denoising"
+  variants:
+    - "Full DDPM (T=100)"
+    - "DDPM no-noise (deterministic)"
+    - "DDPM single-step (T=1)"
+    - "MIP (2-step regression + noise)"
+    - "Pure Regression (RCP)"
+  benchmarks: ["pusht", "reaching"]
+  metrics:
+    - "success_rate"
+    - "mode_coverage"
+    - "latency_ms"
+  num_seeds: 3
+  num_episodes: 50
