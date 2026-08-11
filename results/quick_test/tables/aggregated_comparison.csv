@@ -1,0 +1,6 @@
+benchmark,controller,success_rate_mean,success_rate_std,path_length_mean,collision_rate_mean,latency_ms_mean,mode_coverage_mean,n_seeds,n_episodes
+reaching,Linear MPC,1.0,0.0,5.442887615731886,0.09883040935672513,2.8445384032174683,0.0,1,5
+reaching,Nonlinear MPC (iLQR),1.0,0.0,5.540563382888984,0.10760233918128655,27.794218810863395,0.0,1,5
+reaching,Collision-Free MPC,1.0,0.0,5.434141964568992,0.10130718954248366,80.92517475004071,0.0,1,5
+reaching,Diffusion Warm-Start MPC,1.0,0.0,5.4969135020312505,0.11111111111111112,74.190999676163,0.0,1,5
+reaching,MIP (standalone),0.4,0.0,66.82400862317476,0.04529411764705882,0.006759744046219424,0.0,1,5

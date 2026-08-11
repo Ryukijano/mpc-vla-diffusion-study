@@ -1,0 +1,18 @@
+# Regression Policy (RCP baseline) configuration
+# Single-shot MLP: observation -> action sequence (no diffusion, no iteration)
+
+policy_type: "regression"
+
+# Action / observation dimensions
+action_dim: 2
+horizon: 16
+obs_dim: 4
+
+# Network architecture
+hidden_dim: 256
+num_layers: 4
+
+# Training
+lr: 1.0e-3
+epochs: 200
+batch_size: 64

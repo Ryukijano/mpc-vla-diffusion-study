@@ -1,0 +1,92 @@
+{
+  "experiment": "EXP-001: GCP Component Ablation",
+  "config": {
+    "benchmarks": [
+      "reaching"
+    ],
+    "seeds": [
+      0
+    ],
+    "n_episodes": 5,
+    "horizon": 15,
+    "net_cfg": {
+      "hidden_dim": 64,
+      "num_layers": 2,
+      "training_epochs": 10,
+      "batch_size": 16,
+      "learning_rate": 0.01,
+      "num_demos": 10
+    }
+  },
+  "benchmarks": {
+    "reaching": {
+      "variants": {
+        "Full DDPM (T=100)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.8121837202149134,
+              "path_length": 108.34008724033765,
+              "collision_rate": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "DDPM no-noise (T=100)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.6834379622402291,
+              "path_length": 103.12932532337734,
+              "collision_rate": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "DDPM single-step (T=1)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.010013209345440071,
+              "path_length": 3.8920533617511355,
+              "collision_rate": 0.02,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "MIP (2-iter, noise=0.1)": {
+          "seeds": [
+            {
+              "success_rate": 0.2,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.007109241042700079,
+              "path_length": 87.08857783779169,
+              "collision_rate": 0.03555555555555555,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Pure Regression (RCP)": {
+          "seeds": [
+            {
+              "success_rate": 0.2,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.005585238329347289,
+              "path_length": 71.5682651207886,
+              "collision_rate": 0.047719298245614036,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+# Minimal Iterative Policy (MIP) configuration
+# Multi-step regression with noise injection (Simchowitz iterative compute hypothesis)
+# num_iterations=2 with noise_std>0 IS the Minimal Iterative Policy
+
+policy_type: "iterative_regression"
+
+# Action / observation dimensions
+action_dim: 2
+horizon: 16
+obs_dim: 4
+
+# Iterative refinement hyperparameters
+num_iterations: 2
+noise_std: 0.1
+
+# Network architecture
+hidden_dim: 256
+num_layers: 4
+
+# Training
+lr: 1.0e-3
+epochs: 200
+batch_size: 64

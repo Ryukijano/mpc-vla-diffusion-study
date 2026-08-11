@@ -724,8 +724,8 @@ def evaluate_controllers(bench, controllers, n_episodes, seed=0):
             "success_std": float(np.std([m["success"] for m in runs])),
             "path_length": float(np.mean([m["path_length"] for m in runs])),
             "collision_rate": float(np.mean([m["collision_rate"] for m in runs])),
-            "solve_time_s": float(np.mean([m["solve_time"] for m in runs])),
-            "latency_ms": float(np.mean([m["solve_time"] for m in runs]) * 1000),
+            "solve_time_s": float(np.mean([m["solve_time_s"] for m in runs])),
+            "latency_ms": float(np.mean([m["solve_time_s"] for m in runs]) * 1000),
             "mode_coverage": mode_coverage,
             "n_episodes": len(runs),
         }

@@ -1,0 +1,109 @@
+{
+  "config": {
+    "benchmarks": [
+      "reaching"
+    ],
+    "controller_families": [
+      "mpc",
+      "diffusion"
+    ],
+    "seeds": [
+      0
+    ],
+    "n_episodes": 5,
+    "horizon": 15,
+    "net_size": "medium",
+    "net_cfg": {
+      "hidden_dim": 16,
+      "diffusion_steps": 4,
+      "training_epochs": 10,
+      "batch_size": 8,
+      "learning_rate": 0.01,
+      "num_demos": 10,
+      "num_diffusion_samples": 2,
+      "refine_steps": 2,
+      "ilqr_iters": 5
+    }
+  },
+  "benchmarks": {
+    "reaching": {
+      "controllers": {
+        "Linear MPC": {
+          "seeds": [
+            {
+              "success_rate": 1.0,
+              "success_std": 0.0,
+              "path_length": 5.442887615731886,
+              "collision_rate": 0.09883040935672513,
+              "solve_time_s": 0.0028445384032174683,
+              "latency_ms": 2.8445384032174683,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Nonlinear MPC (iLQR)": {
+          "seeds": [
+            {
+              "success_rate": 1.0,
+              "success_std": 0.0,
+              "path_length": 5.540563382888984,
+              "collision_rate": 0.10760233918128655,
+              "solve_time_s": 0.027794218810863396,
+              "latency_ms": 27.794218810863395,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Collision-Free MPC": {
+          "seeds": [
+            {
+              "success_rate": 1.0,
+              "success_std": 0.0,
+              "path_length": 5.434141964568992,
+              "collision_rate": 0.10130718954248366,
+              "solve_time_s": 0.08092517475004071,
+              "latency_ms": 80.92517475004071,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Diffusion Warm-Start MPC": {
+          "seeds": [
+            {
+              "success_rate": 1.0,
+              "success_std": 0.0,
+              "path_length": 5.4969135020312505,
+              "collision_rate": 0.11111111111111112,
+              "solve_time_s": 0.07419099967616301,
+              "latency_ms": 74.190999676163,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "MIP (standalone)": {
+          "seeds": [
+            {
+              "success_rate": 0.4,
+              "success_std": 0.48989794855663565,
+              "path_length": 66.82400862317476,
+              "collision_rate": 0.04529411764705882,
+              "solve_time_s": 6.759744046219424e-06,
+              "latency_ms": 0.006759744046219424,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        }
+      }
+    }
+  }
+}
