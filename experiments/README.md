@@ -1,8 +1,9 @@
 # Experiments — MPC vs VLA vs Diffusion Study
 
 This directory contains the pre-registered experiment protocols for the comparative
-study of three controller families — Classical MPC, Vision-Language-Action (VLA)
-models, and Diffusion / Generative Control Policies (GCPs) — plus their hybrids.
+study of four controller families — Classical MPC, Vision-Language-Action (VLA)
+models, Diffusion / Generative Control Policies (GCPs), and World Action Models
+(WAMs) — plus their hybrids.
 
 All protocols follow the skill sequence: **design → controls → pre-register →
 execute → verify → refine**. Each protocol is pre-registered before execution;
@@ -19,8 +20,12 @@ after the first evaluation episode is run.
 | [EXP-002](EXP-002-family-comparison/protocol.md) | Three-Family Comparison | H5 (MPC niche), H6 (VLA niche), H7 (hybrid), H8 (Pareto, partial) | Success rate (8 conditions × 3 benchmarks) | 12,000 | Pre-registered |
 | [EXP-003](EXP-003-ood-robustness/protocol.md) | OOD Robustness | H4 (noise + iterative compute → OOD robustness) | Success rate per perturbation level (4 conditions × 5 levels) | 10,000 | Pre-registered |
 | [EXP-004](EXP-004-latency-pareto/protocol.md) | Latency-Performance Pareto | H8 (latency–performance Pareto frontier) | Success rate vs inference latency (Pareto plot, 21 conditions × 2 benchmarks) | 21,000 | Pre-registered |
+| [EXP-005](EXP-005-world-models/protocol.md) | World Action Models | H9 (WAM advantage on long-horizon / contact-rich tasks) | Success rate (5 conditions × MuJoCo/ManiSkill3) | 10,000 | Pre-registered |
+| [EXP-006](EXP-006-sim-to-real/protocol.md) | Sim-to-Real Transfer | H10 (DR + photorealism closes sim-to-real gap) | Sim–real success gap (5 conditions × 2 benchmarks) | 8,000 | Pre-registered |
+| [EXP-007](EXP-007-real-robot-mpc/protocol.md) | Real-Robot MPC | H11 (whole-body MPC outperforms learned policies on dynamic tasks) | Stability + success rate (4 conditions × 2 benchmarks) | 6,000 | Pre-registered |
+| [EXP-008](EXP-008-real-vision/protocol.md) | Real-Robotic Vision OOD | H12 (multi-view + ISP-aware augmentation improves OOD) | Success rate per perturbation level (4 conditions × 5 levels) | 8,000 | Pre-registered |
 
-**Total episodes across all experiments:** 48,000 (+ 210,000 latency measurements in EXP-004).
+**Total episodes across all experiments:** 80,000 (+ 210,000 latency measurements in EXP-004).
 
 ---
 

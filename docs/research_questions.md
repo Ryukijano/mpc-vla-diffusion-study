@@ -52,6 +52,24 @@ What is the latency-performance Pareto frontier across all three families?
   VLA occupies the high-latency / high-generalization region;
   Diffusion policies occupy the middle, with MIP on the Pareto frontier.
 
+### RQ9: World Action Models
+Do WAMs provide measurable advantages over pure VLA/diffusion for physical generalization?
+- **H9:** WAMs outperform VLA/diffusion on long-horizon, contact-rich, and OOD-physics tasks.
+- **H9b:** The WAM advantage comes from predictive supervision (future prediction), not just architecture.
+
+### RQ10: Sim-to-Real
+How can simulation-trained policies be deployed on real robots?
+- **H10:** Domain randomization + photorealistic rendering + ISP-aware augmentation closes the sim-to-real gap.
+- **H10b:** Sim-real co-training (RL-Co) improves data efficiency over real-only fine-tuning.
+
+### RQ11: Real-Robot MPC
+Does whole-body MPC dominate on dynamic real-world robot tasks?
+- **H11:** Whole-body / centroidal MPC outperforms learned policies on legged locomotion and loco-manipulation.
+
+### RQ12: Real Robotic Vision
+How robust are vision-conditioned policies under real-world visual perturbations?
+- **H12:** Multi-view fusion + ISP-aware training significantly improves OOD robustness (lighting, occlusion, distractors).
+
 ## Evaluation Criteria for Each Hypothesis
 
 | Hypothesis | Metric | Test |
@@ -63,3 +81,7 @@ What is the latency-performance Pareto frontier across all three families?
 | H6 | Success rate on language vs non-language tasks | Chi-square |
 | H7 | Success rate: hybrid vs best pure | Paired t-test |
 | H8 | Pareto dominance (latency, success) | Dominance counting |
+| H9 | Success rate: WAM vs VLA vs diffusion on long-horizon / contact-rich | Paired t-test |
+| H10 | Sim-vs-real success gap | Paired t-test across conditions |
+| H11 | Stability rate / fall rate; success on loco-manipulation | Wilcoxon signed-rank |
+| H12 | Success rate per visual perturbation level | ANOVA |
