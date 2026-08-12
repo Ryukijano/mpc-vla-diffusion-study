@@ -1,8 +1,8 @@
 # =============================================================================
 # Environment Lock — MPC vs VLA vs Diffusion Study
 # =============================================================================
-# Generated: 2026-08-11
-# Purpose: Reproducibility manifest for all experiments (EXP-001 through EXP-004).
+# Generated: 2026-08-12
+# Purpose: Reproducibility manifest for all experiments (EXP-001 through EXP-008).
 #
 # To regenerate:
 #   conda run -n mpc_vla pip freeze > experiments/environment.lock
@@ -29,10 +29,10 @@
 # -----------------------------------------------------------------------------
 # Git Commit
 # -----------------------------------------------------------------------------
-# Commit:       2a656cf184fafaec8ae03f31c7a7a4e636718a55
+# Commit:       0867a71d9f1dd413e0fe04a97bca584ef26306c3
 # Branch:       main
 # Command:      git rev-parse HEAD
-# Recorded at:  2026-08-11 (pre-registration time)
+# Recorded at:  2026-08-12
 # Note:         The actual commit at run time is logged in each experiment's
 #               outputs/<condition>/seed_<s>/env_info.json for full traceability.
 

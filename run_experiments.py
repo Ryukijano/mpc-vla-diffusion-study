@@ -104,9 +104,10 @@ _VLA_OK = False
 OpenVLAWrapper = None
 SmallVLA = None
 try:
-    from vla_baselines import OpenVLAWrapper, SmallVLA  # type: ignore
+    from vla_baselines import OpenVLAInference, SmallVLA  # type: ignore
+    OpenVLAWrapper = OpenVLAInference  # expose under expected alias
     _VLA_OK = True
-    print("  [OK] VLA baselines loaded (OpenVLAWrapper, SmallVLA)")
+    print("  [OK] VLA baselines loaded (OpenVLAInference, SmallVLA)")
 except ImportError:
     print("  [SKIP] vla_baselines not found — VLA controllers will be unavailable")
 except Exception as exc:
