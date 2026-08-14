@@ -1,0 +1,103 @@
+{
+  "generated_at": "2026-08-14T02:31:09Z",
+  "dry_run": true,
+  "token_set": false,
+  "dataset_source": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/data",
+  "report_path": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/upload_report.json",
+  "artifacts": [
+    {
+      "artifact": "SmallVLA quick checkpoint",
+      "repo_id": "Ryukijano/smallvla-mpc-vla-diffusion-quick",
+      "repo_type": "model",
+      "status": "dry_run",
+      "local_source": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/model_cards/smallvla-mpc-vla-diffusion-quick",
+      "files": {
+        "README.md": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/model_cards/smallvla-mpc-vla-diffusion-quick/README.md",
+        "small_vla_pusht.pt": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/checkpoints/small_vla_pusht.pt",
+        "config.json": "(extracted from checkpoint during upload)",
+        "metadata.json": "(generated from release manifest)"
+      },
+      "missing_files": [],
+      "message": "Would upload README, checkpoint, config.json and metadata.json",
+      "hub_url": ""
+    },
+    {
+      "artifact": "DDPM Diffusion Policy quick checkpoint",
+      "repo_id": "Ryukijano/ddpm-mpc-vla-diffusion-quick",
+      "repo_type": "model",
+      "status": "dry_run",
+      "local_source": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/model_cards/ddpm-mpc-vla-diffusion-quick",
+      "files": {
+        "README.md": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/model_cards/ddpm-mpc-vla-diffusion-quick/README.md",
+        "ddpm_pusht.pt": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/checkpoints/ddpm_pusht.pt",
+        "config.json": "(extracted from checkpoint during upload)",
+        "metadata.json": "(generated from release manifest)"
+      },
+      "missing_files": [],
+      "message": "Would upload README, checkpoint, config.json and metadata.json",
+      "hub_url": ""
+    },
+    {
+      "artifact": "Flow Matching Policy quick checkpoint",
+      "repo_id": "Ryukijano/flow-matching-mpc-vla-diffusion-quick",
+      "repo_type": "model",
+      "status": "dry_run",
+      "local_source": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/model_cards/flow-matching-mpc-vla-diffusion-quick",
+      "files": {
+        "README.md": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/model_cards/flow-matching-mpc-vla-diffusion-quick/README.md",
+        "flow_matching_pusht.pt": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/checkpoints/flow_matching_pusht.pt",
+        "config.json": "(extracted from checkpoint during upload)",
+        "metadata.json": "(generated from release manifest)"
+      },
+      "missing_files": [],
+      "message": "Would upload README, checkpoint, config.json and metadata.json",
+      "hub_url": ""
+    },
+    {
+      "artifact": "Minimal Iterative Policy (MIP) quick checkpoint",
+      "repo_id": "Ryukijano/mip-mpc-vla-diffusion-quick",
+      "repo_type": "model",
+      "status": "dry_run",
+      "local_source": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/model_cards/mip-mpc-vla-diffusion-quick",
+      "files": {
+        "README.md": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/model_cards/mip-mpc-vla-diffusion-quick/README.md",
+        "mip_pusht.npz": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/checkpoints/mip_pusht.npz",
+        "config.json": "(extracted from checkpoint during upload)",
+        "metadata.json": "(generated from release manifest)"
+      },
+      "missing_files": [],
+      "message": "Would upload README, checkpoint, config.json and metadata.json",
+      "hub_url": ""
+    },
+    {
+      "artifact": "MPC expert demonstrations dataset",
+      "repo_id": "Ryukijano/mpc-expert-demos-quick-test",
+      "repo_type": "dataset",
+      "status": "dry_run",
+      "local_source": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/data",
+      "files": {
+        "README.md": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/hf_artifacts/dataset_cards/mpc-expert-demos-quick-test/README.md",
+        "mpc_expert_demos_state.parquet": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/data/mpc_expert_demos_state.parquet",
+        "mpc_expert_demos_state.npz": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/data/mpc_expert_demos_state.npz",
+        "mpc_expert_demos_images.npz": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/data/mpc_expert_demos_images.npz",
+        "manifest.json": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/data/manifest.json"
+      },
+      "missing_files": [],
+      "message": "Would upload dataset files from /home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/data",
+      "hub_url": ""
+    },
+    {
+      "artifact": "MPC vs VLA vs Diffusion Arena",
+      "repo_id": "Ryukijano/mpc-vla-diffusion-arena",
+      "repo_type": "space",
+      "status": "dry_run",
+      "local_source": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/demo_space",
+      "files": {
+        "folder": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/demo_space"
+      },
+      "missing_files": [],
+      "message": "Would upload entire demo_space/ folder to a Gradio Space",
+      "hub_url": ""
+    }
+  ]
+}
