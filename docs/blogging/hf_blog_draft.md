@@ -66,11 +66,15 @@ The aggregated master comparison table is at [`results/quick_test/report/master_
 
 | Controller | Success rate | Path length | Collision rate | Latency (ms) |
 |---|---:|---:|---:|---:|
-| Linear MPC | 1.0 ± 0.0 | 5.44 | 0.099 | 2.84 |
-| Nonlinear MPC (iLQR) | 1.0 ± 0.0 | 5.54 | 0.108 | 27.79 |
-| Collision-Free MPC | 1.0 ± 0.0 | 5.43 | 0.101 | 80.93 |
-| Diffusion Warm-Start MPC | 1.0 ± 0.0 | 5.50 | 0.111 | 74.19 |
-| MIP (standalone) | 0.4 ± 0.0 | 66.82 | 0.045 | 0.0068 |
+| Linear MPC | 1.0 ± 0.0 | 5.44 | 0.099 | 44.24 |
+| Nonlinear MPC (iLQR) | 1.0 ± 0.0 | 5.54 | 0.108 | 28.04 |
+| Collision-Free MPC | 1.0 ± 0.0 | 5.43 | 0.101 | 212.65 |
+| Diffusion Warm-Start MPC | 1.0 ± 0.0 | 5.50 | 0.111 | 146.50 |
+| MIP (standalone) | 0.4 ± 0.0 | 66.82 | 0.045 | 0.0072 |
+| DDPM Policy | 0.0 ± 0.0 | 4.38 | 0.030 | 16.25 |
+| Flow Matching Policy | 0.4 ± 0.0 | 36.18 | 0.056 | 15.26 |
+| Regression Policy | 0.0 ± 0.0 | 56.49 | 0.023 | 8.45 |
+| Iterative Regression Policy | 0.2 ± 0.0 | 85.58 | 0.048 | 8.51 |
 
 *Table 1: Smoke-test results on 2-D reaching. n = 1 seed, 5 episodes per method.*
 
@@ -102,10 +106,10 @@ The aggregated ablation table is at [`results/quick_test/ablation/ablation_aggre
 
 | Variant | Success rate | Mode coverage | Latency (ms) |
 |---|---:|---:|---:|
-| Full DDPM (T=100) | 0.0 ± 0.0 | 0.0 | 0.812 |
-| DDPM no-noise (T=100) | 0.0 ± 0.0 | 0.0 | 0.683 |
+| Full DDPM (T=100) | 0.0 ± 0.0 | 0.0 | 0.825 |
+| DDPM no-noise (T=100) | 0.0 ± 0.0 | 0.0 | 0.691 |
 | DDPM single-step (T=1) | 0.0 ± 0.0 | 0.0 | 0.010 |
-| MIP (2-iter, noise=0.1) | 0.2 ± 0.0 | 0.0 | 0.0071 |
+| MIP (2-iter, noise=0.1) | 0.2 ± 0.0 | 0.0 | 0.0072 |
 | Pure Regression (RCP) | 0.2 ± 0.0 | 0.0 | 0.0056 |
 
 *Table 2: GCP component ablation on 2-D reaching. n = 1 seed, 5 episodes.*
