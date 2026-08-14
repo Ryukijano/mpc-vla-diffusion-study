@@ -1,0 +1,169 @@
+{
+  "config": {
+    "benchmarks": [
+      "reaching"
+    ],
+    "controller_families": [
+      "mpc",
+      "diffusion"
+    ],
+    "seeds": [
+      0
+    ],
+    "n_episodes": 5,
+    "horizon": 15,
+    "net_size": "medium",
+    "net_cfg": {
+      "hidden_dim": 16,
+      "diffusion_steps": 4,
+      "training_epochs": 10,
+      "batch_size": 8,
+      "learning_rate": 0.01,
+      "num_demos": 10,
+      "num_diffusion_samples": 2,
+      "refine_steps": 2,
+      "ilqr_iters": 5
+    }
+  },
+  "benchmarks": {
+    "reaching": {
+      "controllers": {
+        "Linear MPC": {
+          "seeds": [
+            {
+              "success_rate": 1.0,
+              "success_std": 0.0,
+              "path_length": 5.442887615731886,
+              "collision_rate": 0.09883040935672513,
+              "solve_time_s": 0.002709722883688907,
+              "latency_ms": 2.709722883688907,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Nonlinear MPC (iLQR)": {
+          "seeds": [
+            {
+              "success_rate": 1.0,
+              "success_std": 0.0,
+              "path_length": 5.540563382888984,
+              "collision_rate": 0.10760233918128655,
+              "solve_time_s": 0.028157204711450296,
+              "latency_ms": 28.157204711450298,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Collision-Free MPC": {
+          "seeds": [
+            {
+              "success_rate": 1.0,
+              "success_std": 0.0,
+              "path_length": 5.434141964568992,
+              "collision_rate": 0.10130718954248366,
+              "solve_time_s": 0.07983312258174266,
+              "latency_ms": 79.83312258174266,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Diffusion Warm-Start MPC": {
+          "seeds": [
+            {
+              "success_rate": 1.0,
+              "success_std": 0.0,
+              "path_length": 5.4969135020312505,
+              "collision_rate": 0.11111111111111112,
+              "solve_time_s": 0.07324843903382619,
+              "latency_ms": 73.24843903382619,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "MIP (standalone)": {
+          "seeds": [
+            {
+              "success_rate": 0.4,
+              "success_std": 0.48989794855663565,
+              "path_length": 66.82400862317476,
+              "collision_rate": 0.04529411764705882,
+              "solve_time_s": 6.945194429991877e-06,
+              "latency_ms": 0.006945194429991877,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "DDPM Policy": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "success_std": 0.0,
+              "path_length": 3.9110822049713128,
+              "collision_rate": 0.0,
+              "solve_time_s": 0.005170955417367319,
+              "latency_ms": 5.17095541736732,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Flow Matching Policy": {
+          "seeds": [
+            {
+              "success_rate": 0.2,
+              "success_std": 0.4,
+              "path_length": 68.13307204905061,
+              "collision_rate": 0.04,
+              "solve_time_s": 0.0046717268275097016,
+              "latency_ms": 4.671726827509701,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Regression Policy": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "success_std": 0.0,
+              "path_length": 104.11315993803498,
+              "collision_rate": 0.03,
+              "solve_time_s": 7.648066462328037e-05,
+              "latency_ms": 0.07648066462328038,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        },
+        "Iterative Regression Policy": {
+          "seeds": [
+            {
+              "success_rate": 0.2,
+              "success_std": 0.4,
+              "path_length": 88.23998716151296,
+              "collision_rate": 0.05333333333333333,
+              "solve_time_s": 0.000230343962709109,
+              "latency_ms": 0.230343962709109,
+              "mode_coverage": 0.0,
+              "n_episodes": 5,
+              "seed": 0
+            }
+          ]
+        }
+      }
+    }
+  }
+}

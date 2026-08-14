@@ -128,13 +128,12 @@ def collect_and_package_dataset(
                 action = np.clip(vec * 1.5, -2.0, 2.0)
 
             next_obs, reward, done, info = env.step(action)
-            collector_state.add_transition(
-                obs=state,
-                action=action,
-                next_obs=next_obs,
-                reward=reward,
-                done=done,
-                info={"episode": ep, "step": step},
+            collector_state._append(
+                state,
+                action,
+                next_obs,
+                reward,
+                done,
             )
             if done or env.is_success():
                 break
@@ -208,13 +207,12 @@ def collect_and_package_dataset(
 
             img = env.get_image()
             next_obs, reward, done, info = env.step(action)
-            collector_img.add_transition(
-                obs=img,
-                action=action,
-                next_obs=env.get_image(),
-                reward=reward,
-                done=done,
-                info={"instruction": "Reach the green target in the plane while avoiding obstacles."},
+            collector_img._append(
+                img,
+                action,
+                env.get_image(),
+                reward,
+                done,
             )
             if done or env.is_success():
                 break

@@ -10,8 +10,10 @@ wandb/
 *.npz
 *.ckpt
 *.pt
+*.log
 .venv/
 venv/
 .env
 agent-skills/
 reference_diffusion_policy/
+results/horizon1_runbook.log

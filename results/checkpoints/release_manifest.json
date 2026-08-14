@@ -1,0 +1,76 @@
+{
+  "title": "MPC vs VLA vs Diffusion Study - Baseline Checkpoints",
+  "benchmark": "PushT",
+  "date_created": "2026-08-14 01:52:30",
+  "platform": "DGX Spark (GB10 Grace Blackwell)",
+  "demonstrations": {
+    "n_episodes": 50,
+    "total_transitions": 5000,
+    "mean_episode_length": 100.0,
+    "mean_episode_reward": 1.45417730849694,
+    "success_rate": 0.0,
+    "horizon": 8,
+    "obs_dim": 5,
+    "action_dim": 2,
+    "image_size": 96,
+    "instruction": "push the T block to the target area"
+  },
+  "checkpoints": {
+    "small_vla_pusht": {
+      "path": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/checkpoints/small_vla_pusht.pt",
+      "file_size_bytes": 597893779,
+      "file_size_mb": 570.2,
+      "param_count": 149436944,
+      "input_type": "image (96x96x3) + instruction",
+      "output_shape": [
+        8,
+        2
+      ],
+      "sample_output_mean": 0.008940223604440689,
+      "sample_output_std": 0.009924521669745445,
+      "status": "PASS"
+    },
+    "ddpm_pusht": {
+      "path": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/checkpoints/ddpm_pusht.pt",
+      "file_size_bytes": 44293477,
+      "file_size_mb": 42.24,
+      "param_count": 11058050,
+      "input_type": "state (5,)",
+      "output_shape": [
+        8,
+        2
+      ],
+      "sample_output_mean": 0.01771729066967964,
+      "sample_output_std": 0.6404092311859131,
+      "status": "PASS"
+    },
+    "flow_matching_pusht": {
+      "path": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/checkpoints/flow_matching_pusht.pt",
+      "file_size_bytes": 44294863,
+      "file_size_mb": 42.24,
+      "param_count": 11058050,
+      "input_type": "state (5,)",
+      "output_shape": [
+        8,
+        2
+      ],
+      "sample_output_mean": 0.060967255383729935,
+      "sample_output_std": 0.0839240774512291,
+      "status": "PASS"
+    },
+    "mip_pusht": {
+      "path": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/results/checkpoints/mip_pusht.npz",
+      "file_size_bytes": 60078,
+      "file_size_kb": 58.67,
+      "param_count": 7072,
+      "input_type": "state (5,)",
+      "output_shape": [
+        8,
+        2
+      ],
+      "sample_output_mean": 0.009605894672151498,
+      "sample_output_std": 0.011816738018124577,
+      "status": "PASS"
+    }
+  }
+}

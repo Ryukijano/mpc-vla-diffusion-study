@@ -7,10 +7,10 @@
   "python_version": "3.11.15",
   "python_executable": "/home/aimsgroupuol/miniconda3/envs/mpc_vla/bin/python",
   "git": {
-    "commit_hash": "08e7eff979c1539cb6b5be21da723c2c7e8cc421",
+    "commit_hash": "ccff1932de3263cfe5e01aa22be69354b18ef01e",
     "branch": "main",
     "clean": false,
-    "status_summary": "?? scripts/collect_env_info.py"
+    "status_summary": "M demo_space/app.py\n M scripts/package_hf_models.py\n?? literature/recent_sota_digest.md\n?? repro/\n?? results/checkpoints/\n?? results/horizon1_runbook.log\n?? scripts/run_horizon1.sh"
   },
   "cpu_model": "aarch64",
   "cpu_count_logical": 20,

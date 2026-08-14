@@ -1,0 +1,7 @@
+{
+  "generated_at": "2026-08-14T02:08:11.662314+00:00",
+  "source": "Collision-Free MPC expert (on-the-fly)",
+  "script": "run_experiments.py --quick",
+  "output_dir": "/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/data/quick_demo",
+  "note": "Demonstrations and quick metrics are generated algorithmically by the repository. No external dataset is required."
+}

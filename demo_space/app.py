@@ -105,6 +105,30 @@ except Exception:
 # ---------------------------------------------------------------------------
 # Model Caching / Pre-initialization
 # ---------------------------------------------------------------------------
+class _ArenaObstacle:
+    """Obstacle primitive compatible with both ReachingEnv and src collision helpers.
+
+    ReachingEnv expects ``.contains(point)``; the collision-free MPC / diffusion
+    warm-start scorer expects ``.signed_distance(point)``.  This tiny adapter
+    exposes both APIs so a single obstacle list can be shared across components.
+    """
+
+    def __init__(self, center, radius):
+        self.center = np.asarray(center, dtype=float)
+        self.radius = float(radius)
+
+    def contains(self, point: np.ndarray) -> bool:
+        p = np.asarray(point, dtype=float)
+        return float(np.linalg.norm(p - self.center)) <= self.radius
+
+    def signed_distance(self, point: np.ndarray) -> float:
+        p = np.asarray(point, dtype=float)
+        return float(np.linalg.norm(p - self.center) - self.radius)
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"_ArenaObstacle(center={self.center.tolist()}, radius={self.radius})"
+
+
 _POLICY_CACHE: Dict[str, Any] = {}
 
 
@@ -244,13 +268,13 @@ def run_simulation(
         obstacles_list = []
     elif task_name == "2D Reaching (Cluttered)":
         obstacles_list = [
-            Obstacle([1.5, 1.5], 0.45),
-            Obstacle([2.5, 2.5], 0.5),
-            Obstacle([3.0, 1.0], 0.4),
-            Obstacle([1.0, 3.0], 0.35),
-            Obstacle([3.5, 3.0], 0.35),
-            Obstacle([-2.0, -1.5], 0.45),
-            Obstacle([-3.0, 2.0], 0.35),
+            _ArenaObstacle([1.5, 1.5], 0.45),
+            _ArenaObstacle([2.5, 2.5], 0.5),
+            _ArenaObstacle([3.0, 1.0], 0.4),
+            _ArenaObstacle([1.0, 3.0], 0.35),
+            _ArenaObstacle([3.5, 3.0], 0.35),
+            _ArenaObstacle([-2.0, -1.5], 0.45),
+            _ArenaObstacle([-3.0, 2.0], 0.35),
         ]
         env = ReachingEnv(
             dim=2,

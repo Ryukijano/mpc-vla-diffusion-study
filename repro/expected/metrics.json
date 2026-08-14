@@ -1,0 +1,114 @@
+{
+  "source_csv": "results/quick_test/tables/aggregated_comparison.csv",
+  "n_rows": 9,
+  "metrics": [
+    {
+      "benchmark": "reaching",
+      "controller": "Linear MPC",
+      "success_rate_mean": 1.0,
+      "success_rate_std": 0.0,
+      "path_length_mean": 5.442887615731886,
+      "collision_rate_mean": 0.09883040935672513,
+      "latency_ms_mean": 16.443956663494394,
+      "mode_coverage_mean": 0.0,
+      "n_seeds": 1,
+      "n_episodes": 5
+    },
+    {
+      "benchmark": "reaching",
+      "controller": "Nonlinear MPC (iLQR)",
+      "success_rate_mean": 1.0,
+      "success_rate_std": 0.0,
+      "path_length_mean": 5.540563382888984,
+      "collision_rate_mean": 0.10760233918128655,
+      "latency_ms_mean": 28.21897938643304,
+      "mode_coverage_mean": 0.0,
+      "n_seeds": 1,
+      "n_episodes": 5
+    },
+    {
+      "benchmark": "reaching",
+      "controller": "Collision-Free MPC",
+      "success_rate_mean": 1.0,
+      "success_rate_std": 0.0,
+      "path_length_mean": 5.434141964568992,
+      "collision_rate_mean": 0.10130718954248366,
+      "latency_ms_mean": 122.20846483623914,
+      "mode_coverage_mean": 0.0,
+      "n_seeds": 1,
+      "n_episodes": 5
+    },
+    {
+      "benchmark": "reaching",
+      "controller": "Diffusion Warm-Start MPC",
+      "success_rate_mean": 1.0,
+      "success_rate_std": 0.0,
+      "path_length_mean": 5.4969135020312505,
+      "collision_rate_mean": 0.11111111111111112,
+      "latency_ms_mean": 88.81737186004304,
+      "mode_coverage_mean": 0.0,
+      "n_seeds": 1,
+      "n_episodes": 5
+    },
+    {
+      "benchmark": "reaching",
+      "controller": "MIP (standalone)",
+      "success_rate_mean": 0.4,
+      "success_rate_std": 0.0,
+      "path_length_mean": 66.82400862317476,
+      "collision_rate_mean": 0.04529411764705882,
+      "latency_ms_mean": 0.009480607878489821,
+      "mode_coverage_mean": 0.0,
+      "n_seeds": 1,
+      "n_episodes": 5
+    },
+    {
+      "benchmark": "reaching",
+      "controller": "DDPM Policy",
+      "success_rate_mean": 0.0,
+      "success_rate_std": 0.0,
+      "path_length_mean": 5.531667599754729,
+      "collision_rate_mean": 0.0,
+      "latency_ms_mean": 5.21758158147956,
+      "mode_coverage_mean": 0.0,
+      "n_seeds": 1,
+      "n_episodes": 5
+    },
+    {
+      "benchmark": "reaching",
+      "controller": "Flow Matching Policy",
+      "success_rate_mean": 0.4,
+      "success_rate_std": 0.0,
+      "path_length_mean": 55.110843697643624,
+      "collision_rate_mean": 0.060952380952380945,
+      "latency_ms_mean": 4.68089071268748,
+      "mode_coverage_mean": 0.0,
+      "n_seeds": 1,
+      "n_episodes": 5
+    },
+    {
+      "benchmark": "reaching",
+      "controller": "Regression Policy",
+      "success_rate_mean": 0.0,
+      "success_rate_std": 0.0,
+      "path_length_mean": 111.33974451407475,
+      "collision_rate_mean": 0.01666666666666667,
+      "latency_ms_mean": 0.07656727063780028,
+      "mode_coverage_mean": 0.0,
+      "n_seeds": 1,
+      "n_episodes": 5
+    },
+    {
+      "benchmark": "reaching",
+      "controller": "Iterative Regression Policy",
+      "success_rate_mean": 0.0,
+      "success_rate_std": 0.0,
+      "path_length_mean": 101.43756005487114,
+      "collision_rate_mean": 0.0,
+      "latency_ms_mean": 0.23149937701721984,
+      "mode_coverage_mean": 0.0,
+      "n_seeds": 1,
+      "n_episodes": 5
+    }
+  ]
+}

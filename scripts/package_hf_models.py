@@ -60,30 +60,25 @@ def package_small_vla(output_dir: str, verify: bool = True) -> str:
     print(f"\n[1/4] Packaging SmallVLA into {pkg_dir}...")
 
     config = {
-        "model_name": "SmallVLA",
         "action_dim": 2,
         "horizon": 4,
         "hidden_dim": 32,
         "num_layers": 2,
         "img_size": 64,
         "text_backend": "bow",
+        "device": "cpu",
+    }
+
+    model_info = {
+        "model_name": "SmallVLA",
         "vision_backbone": "SmallViT",
         "vision_embed_dim": 768,
         "vision_depth": 12,
         "vision_heads": 12,
-        "device": "cpu",
     }
 
     # Initialize model
-    model = SmallVLA(
-        action_dim=config["action_dim"],
-        horizon=config["horizon"],
-        hidden_dim=config["hidden_dim"],
-        num_layers=config["num_layers"],
-        img_size=config["img_size"],
-        text_backend=config["text_backend"],
-        device="cpu",
-    )
+    model = SmallVLA(**config)
     model.eval_mode()
 
     # Save checkpoint
@@ -96,6 +91,7 @@ def package_small_vla(output_dir: str, verify: bool = True) -> str:
                 "study": "mpc-vla-diffusion-study",
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                 "framework": "PyTorch",
+                **model_info,
             },
         },
         ckpt_path,
@@ -241,8 +237,8 @@ print("Action sequence shape:", actions.shape)
         print("  [Verify] Testing SmallVLA loading and inference...")
         loaded_ckpt = torch.load(ckpt_path, map_location="cpu")
         vla_test = SmallVLA(**loaded_ckpt["config"])
+        vla_test.eval_mode()  # resolve lazy text backend before loading state dict
         vla_test.load_state_dict(loaded_ckpt["model_state_dict"])
-        vla_test.eval_mode()
         dummy_im = np.zeros((64, 64, 3), dtype=np.uint8)
         pred = vla_test.predict_action(dummy_im, "Reach target")
         assert pred.shape == (4, 2), f"Unexpected shape {pred.shape}"
