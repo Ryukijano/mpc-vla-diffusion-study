@@ -27,14 +27,14 @@
 # Python:       3.11.15
 
 # -----------------------------------------------------------------------------
-# Git Commit
+# Git Commit / Runtime Traceability
 # -----------------------------------------------------------------------------
-# Commit:       0867a71d9f1dd413e0fe04a97bca584ef26306c3
+# This file records the Python package state captured on 2026-08-13.
 # Branch:       main
-# Command:      git rev-parse HEAD
-# Recorded at:  2026-08-12
-# Note:         The actual commit at run time is logged in each experiment's
-#               outputs/<condition>/seed_<s>/env_info.json for full traceability.
+# The exact git commit of any given run is recorded in that run's
+# outputs/<condition>/seed_<s>/env_info.json (and in git tags / release notes)
+# rather than in this lock file, so the lock remains traceable without being
+# tied to the commit that commits it.
 
 # -----------------------------------------------------------------------------
 # Key Packages (summary)

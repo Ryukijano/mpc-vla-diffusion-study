@@ -1,8 +1,17 @@
 # Claim Verification Audit — MPC vs VLA vs Diffusion Study
 
 **Generated:** 2026-08-12  
+**Updated:** 2026-08-13  
 **Scope:** Review claims that could appear in the Hugging Face blog post against the current repository state.  
 **Repository:** `mpc-vla-diffusion-study` (`/home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/`)
+
+> **Update note (2026-08-13):** The following issues from the original audit have since been resolved:
+> - `run_experiments.py` VLA import fixed (`OpenVLAWrapper` now aliases `OpenVLAInference`).
+> - VLA baselines are now gracefully skipped for state-only demos with an informative message; full image+language support still requires collecting image-based demonstrations.
+> - Top-level `LICENSE` (MIT) added at repo root.
+> - `experiments/environment.lock` refreshed and no longer tied to a specific self-referential git commit.
+>
+> Outstanding blockers for a strong blog remain: (1) VLA baselines are not actually trained/used in the quick test; (2) no HF Hub artifacts exist yet; (3) quick-test results are 1 seed / 5 episodes only; (4) `data/` is empty and `env_info.json` is not generated at runtime.
 
 This audit is organized into the five requested categories. For each claim we list the proposed wording, where it appears or could appear, the evidence in the repo, and a verdict. Verdicts are:
 

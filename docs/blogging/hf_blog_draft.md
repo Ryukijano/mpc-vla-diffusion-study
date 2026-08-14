@@ -58,7 +58,8 @@ The full protocol is large: ~80,000 evaluation episodes plus 210,000 dedicated l
 Before scaling to the full protocol, we ran a fast smoke test to verify the harness. This used one seed, five episodes, tiny networks (hidden dim 16, 10 training epochs, 10 demonstrations), and a single 2-D reaching benchmark. The command is:
 
 ```bash
-conda run -n mpc_vla python run_experiments.py --quick
+# This script runs the quick experiment, the GCP ablation, and the report generator
+bash scripts/run_quick_test.sh
 ```
 
 The aggregated master comparison table is at [`results/quick_test/report/master_comparison_table.csv`](https://github.com/Ryukijano/mpc-vla-diffusion-study/blob/main/results/quick_test/report/master_comparison_table.csv):
@@ -77,6 +78,8 @@ The aggregated master comparison table is at [`results/quick_test/report/master_
 *Figure 1: Success rate in the quick test. Note the tiny sample size.*
 
 What can we say from this? Only that, in our smoke test, every MPC variant found a feasible path to the goal, while the small standalone MIP and the pure learned baselines did not consistently solve the task. The MIP policy was extremely fast (~7 µs) but wandered far off course, as its high path length suggests. We cannot conclude that MPC is universally better — the task has a known dynamics model and a single goal, which strongly favors optimization-based methods. We also cannot conclude that MIP is useless; the network was tiny and trained on only 10 demos.
+
+Note: the quick test uses state-only 2-D reaching, so the VLA baselines are not exercised here. VLA will be evaluated on image+language tasks in the full protocol.
 
 The more interesting pattern is the latency spread. Classical MPC runs from ~2.8 ms (linear) to ~81 ms (collision-free SDF). Diffusion warm-start MPC lands at ~74 ms, roughly comparable to the safest MPC variant. MIP is essentially free in wall-clock time but pays for it in task success.
 

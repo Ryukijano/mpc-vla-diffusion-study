@@ -532,37 +532,46 @@ def train_learning_controllers(demos, bench, horizon, net_cfg, seed=0):
             print(f"    [SKIP] Iterative Regression Policy: {exc}")
 
     # --- SmallVLA ---
+    # VLA baselines require image + language demonstrations. State-only demos
+    # (the default for the 2-D reaching quick test) are not sufficient.
     if _VLA_OK and SmallVLA is not None:
-        try:
-            print("  [training] SmallVLA...")
-            vla = SmallVLA(state_dim=state_dim, action_dim=action_dim,
-                           hidden_dim=hidden_dim, seed=seed)
-            vla.train(demos, epochs=epochs, batch_size=batch_size, lr=lr)
+        has_image_demos = any(isinstance(d, dict) and "image" in d for d in demos[:1])
+        if not has_image_demos:
+            print("  [SKIP] SmallVLA: requires image-based demonstrations (state-only demos provided)")
+        else:
+            try:
+                print("  [training] SmallVLA...")
+                vla = SmallVLA(action_dim=action_dim, horizon=horizon,
+                               hidden_dim=hidden_dim)
+                vla.train(demos, epochs=epochs, batch_size=batch_size, lr=lr)
 
-            def vla_policy(x, _v=vla, _lo=u_bounds[0], _hi=u_bounds[1]):
-                a = _v.predict(x)
-                return np.clip(a, _lo, _hi)
+                def vla_policy(x, _v=vla, _lo=u_bounds[0], _hi=u_bounds[1]):
+                    a = _v.predict_action(x["image"], x.get("instruction", ""))
+                    return np.clip(a, _lo, _hi)
 
-            controllers["SmallVLA"] = vla_policy
-            print("    [OK] SmallVLA trained")
-        except Exception as exc:
-            print(f"    [SKIP] SmallVLA: {exc}")
+                controllers["SmallVLA"] = vla_policy
+                print("    [OK] SmallVLA trained")
+            except Exception as exc:
+                print(f"    [SKIP] SmallVLA: {exc}")
 
     # --- OpenVLA (typically too large for quick tests, but try) ---
     if _VLA_OK and OpenVLAWrapper is not None:
-        try:
-            print("  [training] OpenVLA (this may take a while)...")
-            vla = OpenVLAWrapper()
-            vla.train(demos)
+        has_image_demos = any(isinstance(d, dict) and "image" in d for d in demos[:1])
+        if not has_image_demos:
+            print("  [SKIP] OpenVLA: requires image-based demonstrations (state-only demos provided)")
+        else:
+            try:
+                print("  [training] OpenVLA (this may take a while)...")
+                vla = OpenVLAWrapper()
 
-            def openvla_policy(x, _v=vla, _lo=u_bounds[0], _hi=u_bounds[1]):
-                a = _v.predict(x)
-                return np.clip(a, _lo, _hi)
+                def openvla_policy(x, _v=vla, _lo=u_bounds[0], _hi=u_bounds[1]):
+                    a = _v.predict_action(x["image"], x.get("instruction", ""))
+                    return np.clip(a, _lo, _hi)
 
-            controllers["OpenVLA"] = openvla_policy
-            print("    [OK] OpenVLA loaded")
-        except Exception as exc:
-            print(f"    [SKIP] OpenVLA: {exc}")
+                controllers["OpenVLA"] = openvla_policy
+                print("    [OK] OpenVLA loaded")
+            except Exception as exc:
+                print(f"    [SKIP] OpenVLA: {exc}")
 
     return controllers
 
@@ -891,6 +900,8 @@ def run_experiment(args):
             args.seeds = [0]
         if args.episodes is None:
             args.episodes = 5
+        if args.output_dir is None:
+            args.output_dir = os.path.join(STUDY_ROOT, "results", "quick_test")
         bench_names = ["reaching"]
         ctrl_families = ["mpc", "diffusion"]
 
