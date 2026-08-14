@@ -10,11 +10,11 @@
 
 ## Executive Summary
 
-- **Horizon 1 (EXP-001–004):** Partially started. Only quick smoke-test outputs exist. Full pre-registered 5-seed, 100-episode runs have not been completed.
+- **Horizon 1 (EXP-001–004):** In progress. Checkpoints trained. EXP-001 completed on first run (5 seeds, 25 episodes, 2 benchmarks). `scripts/run_horizon1.sh` is running EXP-001–002–004 sequentially on DGX Spark; previous CLI argument mismatches fixed.
 - **Horizon 2 (EXP-005–010):** Pending. Protocol directories for EXP-005–008 exist; EXP-009 and EXP-010 protocols are not yet on disk.
-- **Checkpoints:** Local baseline PushT checkpoints have been trained and verified, but the full per-experiment checkpoint trees are missing.
-- **HF Hub Artifacts:** Not uploaded; local packaging is incomplete.
-- **Blog:** Draft exists; publication is gated on full Horizon 1 results and Hub artifacts.
+- **Checkpoints:** `results/checkpoints/` contains four verified PushT baseline checkpoints (`small_vla_pusht.pt`, `ddpm_pusht.pt`, `flow_matching_pusht.pt`, `mip_pusht.npz`) and `release_manifest.json`.
+- **HF Hub Artifacts:** Local model cards, dataset card, and upload checklist created in `results/hf_artifacts/`. Uploads to Hub pending `HF_TOKEN`.
+- **Blog:** Draft exists; publication gated on full Horizon 1 results and Hub artifacts.
 
 ---
 
