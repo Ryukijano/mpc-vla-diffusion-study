@@ -1,0 +1,6 @@
+benchmark,variant,success_rate_mean,success_rate_std,mode_coverage_mean,latency_ms_mean,n_seeds,n_episodes
+reaching,Full DDPM (T=100),0.0,0.0,0.0,0.8121837202149134,1,5
+reaching,DDPM no-noise (T=100),0.0,0.0,0.0,0.6834379622402291,1,5
+reaching,DDPM single-step (T=1),0.0,0.0,0.0,0.010013209345440071,1,5
+reaching,"MIP (2-iter, noise=0.1)",0.2,0.0,0.0,0.007109241042700079,1,5
+reaching,Pure Regression (RCP),0.2,0.0,0.0,0.005585238329347289,1,5

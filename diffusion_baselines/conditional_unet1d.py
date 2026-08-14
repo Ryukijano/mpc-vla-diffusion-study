@@ -336,6 +336,14 @@ class ConditionalUnet1D(nn.Module):
         -------
         ``(B, horizon, input_dim)`` prediction.
         """
+        orig_h = sample.shape[1]
+        pad_mult = 2 ** len(self.down_modules)
+        pad_len = (pad_mult - (orig_h % pad_mult)) % pad_mult
+        if pad_len > 0:
+            sample = torch.nn.functional.pad(sample, (0, 0, 0, pad_len))
+            if local_cond is not None:
+                local_cond = torch.nn.functional.pad(local_cond, (0, 0, 0, pad_len))
+
         sample = einops.rearrange(sample, "b h t -> b t h")
 
         # 1. Timestep embedding -> global feature.
@@ -386,4 +394,6 @@ class ConditionalUnet1D(nn.Module):
 
         x = self.final_conv(x)
         x = einops.rearrange(x, "b t h -> b h t")
+        if pad_len > 0:
+            x = x[:, :orig_h, :]
         return x

@@ -321,3 +321,16 @@ class TextEncoder(nn.Module):
         elif self._bow_encoder is not None:
             self._bow_encoder.train(mode)
         return self
+
+    def to(self, *args, **kwargs):
+        """Move TextEncoder and any lazily-loaded modules to device."""
+        device, dtype, non_blocking, convert_to_format = torch._C._nn._parse_to(*args, **kwargs)
+        if device is not None:
+            self.device = torch.device(device)
+            if self._clip_model is not None:
+                self._clip_model = self._clip_model.to(*args, **kwargs)
+            if self._projection is not None:
+                self._projection = self._projection.to(*args, **kwargs)
+            if self._bow_encoder is not None:
+                self._bow_encoder = self._bow_encoder.to(*args, **kwargs)
+        return super().to(*args, **kwargs)

@@ -27,6 +27,7 @@ from .conditional_unet1d import (
     Upsample1d,
 )
 from .ddpm_policy import DiffusionPolicy
+DDPMPolicy = DiffusionPolicy
 from .flow_matching_policy import FlowMatchingPolicy
 from .iterative_regression_policy import IterativeRegressionPolicy
 from .noise_schedule import (
@@ -47,6 +48,7 @@ __all__ = [
     "Upsample1d",
     # Policies
     "DiffusionPolicy",
+    "DDPMPolicy",
     "FlowMatchingPolicy",
     "RegressionPolicy",
     "IterativeRegressionPolicy",

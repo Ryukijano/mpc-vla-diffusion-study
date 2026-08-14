@@ -253,6 +253,7 @@ class SmallVLA(nn.Module):
             output_dim=hidden_dim,
             backend=text_backend,
             model_name=text_model_name,
+            device=self._device,
         )
 
         # Fusion: concatenate vision + language, project to hidden_dim

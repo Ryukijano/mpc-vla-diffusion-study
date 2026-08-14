@@ -29,6 +29,9 @@ from .pusht_env import PushTEnv
 from .demonstration_collector import DemonstrationCollector
 from .evaluation import Evaluator
 
+Reaching = ReachingEnv
+PushT = PushTEnv
+
 # MetaWorld is an optional dependency; import lazily so that the package can be
 # imported even when MetaWorld is not installed.
 try:
@@ -45,7 +48,9 @@ __all__ = [
     "EnvSpec",
     "Obstacle",
     "ReachingEnv",
+    "Reaching",
     "PushTEnv",
+    "PushT",
     "MetaWorldWrapper",
     "SUPPORTED_METAWORLD_TASKS",
     "DemonstrationCollector",

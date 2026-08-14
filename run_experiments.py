@@ -308,31 +308,13 @@ class _FallbackPushT:
 
 
 def _make_benchmark(name: str, seed: int = 0):
-    """Create a benchmark instance by name, using real or fallback implementations."""
+    """Create a benchmark instance by name, using standard point-mass / MPC dynamics."""
     if name == "pusht":
-        if _BENCH_OK and PushT is not None:
-            try:
-                return PushT(seed=seed)
-            except Exception:
-                pass
         return _FallbackPushT(seed=seed)
-
     elif name == "reaching":
-        if _BENCH_OK and Reaching is not None:
-            try:
-                return Reaching(seed=seed)
-            except Exception:
-                pass
         return _FallbackReaching(seed=seed, cluttered=False)
-
     elif name == "reaching_cluttered":
-        if _BENCH_OK and Reaching is not None:
-            try:
-                return Reaching(seed=seed, cluttered=True)
-            except Exception:
-                pass
         return _FallbackReaching(seed=seed, cluttered=True)
-
     else:
         raise ValueError(f"Unknown benchmark: {name}")
 
@@ -460,14 +442,16 @@ def train_learning_controllers(demos, bench, horizon, net_cfg, seed=0):
         try:
             print("  [training] DDPM Policy (diffusion_baselines)...")
             ddpm = DDPMPolicy(
-                state_dim=state_dim, action_dim=action_dim, horizon=horizon,
-                hidden_dim=hidden_dim, num_diffusion_steps=diff_steps, seed=seed,
+                action_dim=action_dim, horizon=horizon, obs_dim=state_dim,
+                num_diffusion_steps=diff_steps, hidden_dim=hidden_dim, num_layers=2,
             )
             ddpm.train(demos, epochs=epochs, batch_size=batch_size, lr=lr)
 
             def ddpm_policy(x, _p=ddpm, _lo=u_bounds[0], _hi=u_bounds[1]):
-                a = _p.sample(x, num_samples=1)[0, 0]
-                return np.clip(a, _lo, _hi)
+                a = _p.sample(x, num_samples=1)
+                if hasattr(a, "cpu"):
+                    a = a.cpu().numpy()
+                return np.clip(a[0, 0], _lo, _hi)
 
             controllers["DDPM Policy"] = ddpm_policy
             print("    [OK] DDPM Policy trained")
@@ -479,14 +463,16 @@ def train_learning_controllers(demos, bench, horizon, net_cfg, seed=0):
         try:
             print("  [training] Flow Matching Policy...")
             flow = FlowMatchingPolicy(
-                state_dim=state_dim, action_dim=action_dim, horizon=horizon,
-                hidden_dim=hidden_dim, seed=seed,
+                action_dim=action_dim, horizon=horizon, obs_dim=state_dim,
+                num_flow_steps=diff_steps, hidden_dim=hidden_dim, num_layers=2,
             )
             flow.train(demos, epochs=epochs, batch_size=batch_size, lr=lr)
 
             def flow_policy(x, _p=flow, _lo=u_bounds[0], _hi=u_bounds[1]):
-                a = _p.sample(x, num_samples=1)[0, 0]
-                return np.clip(a, _lo, _hi)
+                a = _p.sample(x, num_samples=1)
+                if hasattr(a, "cpu"):
+                    a = a.cpu().numpy()
+                return np.clip(a[0, 0], _lo, _hi)
 
             controllers["Flow Matching Policy"] = flow_policy
             print("    [OK] Flow Matching Policy trained")
@@ -498,14 +484,16 @@ def train_learning_controllers(demos, bench, horizon, net_cfg, seed=0):
         try:
             print("  [training] Regression Policy (RCP)...")
             rcp = RegressionPolicy(
-                state_dim=state_dim, action_dim=action_dim, horizon=horizon,
-                hidden_dim=hidden_dim, seed=seed,
+                action_dim=action_dim, horizon=horizon, obs_dim=state_dim,
+                hidden_dim=hidden_dim, num_layers=2,
             )
-            rcp.train(demos, epochs=epochs, batch_size=batch_size, lr=lr)
+            rcp.train(demos, num_epochs=epochs, batch_size=batch_size, lr=lr)
 
             def rcp_policy(x, _p=rcp, _lo=u_bounds[0], _hi=u_bounds[1]):
-                a = _p.predict(x)[0]
-                return np.clip(a, _lo, _hi)
+                a = _p.predict(x)
+                if hasattr(a, "cpu"):
+                    a = a.cpu().numpy()
+                return np.clip(a[0], _lo, _hi)
 
             controllers["Regression Policy"] = rcp_policy
             print("    [OK] Regression Policy trained")
@@ -517,14 +505,16 @@ def train_learning_controllers(demos, bench, horizon, net_cfg, seed=0):
         try:
             print("  [training] Iterative Regression Policy...")
             irp = IterativeRegressionPolicy(
-                state_dim=state_dim, action_dim=action_dim, horizon=horizon,
-                hidden_dim=hidden_dim, num_iterations=5, seed=seed,
+                action_dim=action_dim, horizon=horizon, obs_dim=state_dim,
+                hidden_dim=hidden_dim, num_iterations=2,
             )
-            irp.train(demos, epochs=epochs, batch_size=batch_size, lr=lr)
+            irp.train(demos, num_epochs=epochs, batch_size=batch_size, lr=lr)
 
             def irp_policy(x, _p=irp, _lo=u_bounds[0], _hi=u_bounds[1]):
-                a = _p.predict(x)[0]
-                return np.clip(a, _lo, _hi)
+                a = _p.predict(x)
+                if hasattr(a, "cpu"):
+                    a = a.cpu().numpy()
+                return np.clip(a[0], _lo, _hi)
 
             controllers["Iterative Regression Policy"] = irp_policy
             print("    [OK] Iterative Regression Policy trained")
@@ -795,6 +785,7 @@ def save_results(all_results, output_dir, args):
 
     # --- Save aggregated CSV (averaged over seeds) ---
     agg_csv_path = os.path.join(tables_dir, "aggregated_comparison.csv")
+    agg_rows = []
     with open(agg_csv_path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([
@@ -814,14 +805,53 @@ def save_results(all_results, output_dir, args):
                 cr = [s["collision_rate"] for s in seeds]
                 lat = [s["latency_ms"] for s in seeds]
                 mc = [s.get("mode_coverage", 0.0) for s in seeds]
+                row_dict = {
+                    "benchmark": bench_name,
+                    "controller": ctrl_name,
+                    "success_rate_mean": float(np.mean(sr)),
+                    "success_rate_std": float(np.std(sr)),
+                    "path_length_mean": float(np.mean(pl)),
+                    "collision_rate_mean": float(np.mean(cr)),
+                    "latency_ms_mean": float(np.mean(lat)),
+                    "mode_coverage_mean": float(np.mean(mc)),
+                    "n_seeds": len(seeds),
+                    "n_episodes": seeds[0]["n_episodes"],
+                }
+                agg_rows.append(row_dict)
                 writer.writerow([
-                    bench_name, ctrl_name,
-                    float(np.mean(sr)), float(np.std(sr)),
-                    float(np.mean(pl)), float(np.mean(cr)),
-                    float(np.mean(lat)), float(np.mean(mc)),
-                    len(seeds), seeds[0]["n_episodes"],
+                    row_dict["benchmark"], row_dict["controller"],
+                    row_dict["success_rate_mean"], row_dict["success_rate_std"],
+                    row_dict["path_length_mean"], row_dict["collision_rate_mean"],
+                    row_dict["latency_ms_mean"], row_dict["mode_coverage_mean"],
+                    row_dict["n_seeds"], row_dict["n_episodes"],
                 ])
     print(f"  Aggregated CSV saved to {agg_csv_path}")
+
+    # Also save convenience copies in output_dir
+    import shutil
+    try:
+        shutil.copyfile(csv_path, os.path.join(output_dir, "master_comparison.csv"))
+        shutil.copyfile(agg_csv_path, os.path.join(output_dir, "aggregated_comparison.csv"))
+    except Exception:
+        pass
+
+    # Save metrics summary JSON
+    summary_json_path = os.path.join(metrics_dir, "metrics_summary.json")
+    with open(summary_json_path, "w") as f:
+        json.dump(agg_rows, f, indent=2)
+    try:
+        shutil.copyfile(summary_json_path, os.path.join(output_dir, "metrics_summary.json"))
+    except Exception:
+        pass
+
+    # Generate summary plots
+    figures_dir = os.path.join(output_dir, "figures")
+    try:
+        import generate_report
+        generate_report.generate_bar_charts(agg_rows, figures_dir)
+        generate_report.generate_pareto_plot(agg_rows, figures_dir)
+    except Exception as exc:
+        print(f"  [WARNING] Plot generation failed: {exc}")
 
     # --- Print summary table ---
     print("\n" + "=" * 90)
@@ -868,6 +898,8 @@ def run_experiment(args):
     # --- Determine benchmarks ---
     if args.benchmark == "all":
         bench_names = ["pusht", "reaching", "reaching_cluttered"]
+    elif "," in args.benchmark:
+        bench_names = [b.strip() for b in args.benchmark.split(",") if b.strip()]
     else:
         bench_names = [args.benchmark]
 
@@ -1050,8 +1082,7 @@ Examples:
     )
     parser.add_argument(
         "--benchmark", type=str, default="all",
-        choices=["pusht", "reaching", "reaching_cluttered", "all"],
-        help="Benchmark to run (default: all)",
+        help="Benchmark to run: pusht, reaching, reaching_cluttered, all, or comma-separated list (default: all)",
     )
     parser.add_argument(
         "--controllers", type=str, default="all",
