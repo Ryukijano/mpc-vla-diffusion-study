@@ -428,6 +428,7 @@ Each package contains a `README.md` model card, `config.yaml`, `example_inferenc
 | Step | Command | Output directory / key files | Status |
 |---|---|---|---|
 | Quick MPC demo dataset | `conda run -n mpc_vla python scripts/package_hf_dataset.py --output-dir results/hf_datasets/mpc_expert_demos --n-episodes 2 --max-steps 10` | `results/hf_datasets/mpc_expert_demos/README.md`, `mpc_expert_demos_state.npz`, `mpc_expert_demos_state.parquet`, `mpc_expert_demos_images.npz` | PASS |
+| Dummy dataset dry-run | `conda run -n mpc_vla python scripts/package_hf_dataset.py --output-dir /tmp/hf_dataset_dry --n-episodes 2 --max-steps 5 --dry-run` | `/tmp/hf_dataset_dry/README.md`, `mpc_expert_demos_state.npz`, `mpc_expert_demos_state.parquet`, `mpc_expert_demos_images.npz` | PASS |
 
 ### 8.3 Trained release checkpoints
 

@@ -73,7 +73,8 @@ def collect_and_package_dataset(
         total = max(n_episodes * max_steps, 4)
         obs_arr = rng.randn(total, 4).astype(np.float32)
         act_arr = rng.randn(total, 2).astype(np.float32)
-        nobs_arr = obs_arr + 0.1 * act_arr
+        nobs_arr = obs_arr.copy()
+        nobs_arr[:, :2] += 0.1 * act_arr
         rew_arr = -np.linalg.norm(obs_arr[:, :2], axis=1).astype(np.float32)
         done_arr = np.zeros(total, dtype=bool)
         steps_per_ep = max(1, total // n_episodes)

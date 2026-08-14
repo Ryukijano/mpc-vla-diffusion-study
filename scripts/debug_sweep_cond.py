@@ -4,21 +4,21 @@ sys.path.insert(0, os.path.abspath('mpc_baselines_repo'))
 import numpy as np
 
 from scripts.run_pareto_cpu_low_latency import make_benchmark, get_u_bounds
-from src.collision_free_mpc import CollisionFreeMPC
+from src.nonlinear_mpc import NonlinearMPC
 
 bench = make_benchmark('reaching', seed=0)
 bench.u_bounds = get_u_bounds(bench)
 stage, term, Q, R, Qf = bench.make_costs()
 
 for it in [1, 3, 5, 10, 15]:
-    mpc = CollisionFreeMPC(bench.dyn.dynamics, stage, term, bench.world,
-                           horizon=16, u_bounds=bench.u_bounds, collision_weight=100.0, ilqr_iters=it)
+    mpc = NonlinearMPC(bench.dyn.dynamics, stage, term, horizon=16, u_bounds=bench.u_bounds)
     s = bench.reset()
     success = False
     state = s.copy()
     for t in range(60):
-        U = mpc.solve(state)
-        a = U[0]
+        a = mpc.solve(state, max_iter=it)['action']
+        if t < 5:
+            print(f'  iters={it} step={t} state={state[:2]} action={a}')
         state = bench.step(state, a)
         if bench.is_success(state):
             success = True
