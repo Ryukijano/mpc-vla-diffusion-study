@@ -34,7 +34,7 @@ ${RUN} run_ablation.py \
   --seeds 0 1 2 42 123 \
   --episodes 25 \
   --epochs 30 \
-  --num-demos 50 \
+  --num-demos 20 \
   --output-dir results/exp001
 
 # 3. EXP-002: Three-family comparison (reaching only for first full run)
@@ -44,6 +44,7 @@ ${RUN} run_experiments.py \
   --controllers mpc,diffusion,vla \
   --seeds 0 1 2 42 123 \
   --episodes 10 \
+  --net-size small \
   --output-dir results/exp002
 
 # 4. EXP-004: Latency Pareto sweep (reaching focus)

@@ -946,28 +946,28 @@ def run_ablation(args):
 
         bench_results = {"variants": {}}
 
+        # Phase 1: Collect demos once (deterministic, seed 0)
+        print("\n  Phase 1: Collecting demonstrations...")
+        bench_0 = _make_benchmark(bench_name, seed=0)
+        demos = collect_demonstrations(
+            bench_0, n_demos=n_demos, horizon=horizon,
+            u_bounds=u_bounds, seed=0,
+        )
+
+        # Phase 2: Build and train ablation variants once
+        print("\n  Phase 2: Training ablation variants...")
+        variants = build_ablation_variants(
+            demos, bench_0, horizon, net_cfg, seed=0,
+        )
+
+        if not variants:
+            print("  [WARNING] No variants available -- skipping")
+            continue
+
+        # Phase 3: Evaluate across seeds
         for seed in seeds:
             print(f"\n  [Seed {seed}]")
             bench = _make_benchmark(bench_name, seed=seed)
-
-            # Phase 1: Collect demos
-            print(f"  Phase 1: Collecting demonstrations...")
-            demos = collect_demonstrations(
-                bench, n_demos=n_demos, horizon=horizon,
-                u_bounds=u_bounds, seed=seed,
-            )
-
-            # Phase 2: Build and train ablation variants
-            print(f"  Phase 2: Training ablation variants...")
-            variants = build_ablation_variants(
-                demos, bench, horizon, net_cfg, seed=seed,
-            )
-
-            if not variants:
-                print("  [WARNING] No variants available -- skipping")
-                continue
-
-            # Phase 3: Evaluate
             print(f"  Phase 3: Evaluating {len(variants)} variants "
                   f"on {n_episodes} episodes...")
             seed_results = evaluate_variants(
