@@ -48,7 +48,7 @@
 | **Status** | **CPU low-latency sweep completed.** 34 conditions on `reaching` and `pusht`, 10 warmup + 100 timed inferences per condition on CPU. |
 | **Outputs** | `results/exp004_cpu_low_latency/pareto_data.csv`, `latency_table.csv`, `pareto_frontier.png`, `metrics_summary.json`, `VERIFICATION.md` |
 | **Key finding** | `Linear MPC (H=5)` is the Pareto-optimal point on both benchmarks (100% success at ~0.37 ms on reaching, ~0.42 ms on PushT). Regression and MIP come close but are Pareto-dominated. |
-| **Canonical GPU sweep** | `scripts/run_pareto_sweep.py` not yet executed; runbook still points to it. Pending. |
+| **GPU image-based sweep** | `scripts/run_pareto_sweep.py` completed a fast `reaching` run: 1 seed, 2 episodes, 5 warmup + 100 timed calls. Outputs in `results/exp004_gpu_quick/`. Full 5-seed, 50-episode sweep pending more compute budget. |
 
 ---
 

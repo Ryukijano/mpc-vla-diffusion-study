@@ -194,7 +194,35 @@ The full Pareto dataset is at [`results/exp004_cpu_low_latency/pareto_data.csv`]
 
 On these toy tasks, **classical linear MPC dominates the Pareto frontier**: it is the fastest method we measured (0.3–0.4 ms p50) and also reaches 100% success. The learned baselines can get close — regression at 0.5 ms and MIP at 4.7 ms on reaching — but they are Pareto-dominated by the faster linear MPC. Nonlinear MPC and longer-horizon linear MPC trade latency for no gain in success, so they are also dominated. This is a strong sanity check that the low-latency, model-known regime still belongs to MPC.
 
-The interesting question is whether this pattern holds when we add vision, language, contact, and multi-modal goals. The GPU Pareto sweep with full DDPM, flow matching, and SmallVLA conditions is still running; we expect it to shift the frontier if the learned policies can achieve high success at latencies below those of nonlinear MPC. We also expect VLA to be the highest-latency, highest-generalization point on the right side of the plot. MIP and WAMs remain the wildcards that could push the frontier outward.
+### Image-based GPU Pareto
+
+The CPU sweep above uses state-only reactive rollouts. To stress vision and language, we ran a fast image-based GPU Pareto sweep on `reaching` that includes `SmallVLA` and trains DDPM/Flow/MIP on rendered 96×96 RGB observations plus natural-language instructions:
+
+```bash
+conda run -n mpc_vla python scripts/run_pareto_sweep.py \
+    --benchmark reaching --seeds 0 --episodes 2 \
+    --n-warmup 5 --n-timed 100 \
+    --output-dir results/exp004_gpu_quick
+```
+
+![pareto gpu](results/exp004_gpu_quick/pareto_frontier.png)
+*Figure 5: EXP-004 GPU image-based Pareto sweep on `reaching`. 1 seed, 2 episodes, 5 warmup + 100 timed inferences per condition. This is a fast vision-language sweep, not the final 5-seed 50-episode Pareto.*
+
+| Controller | Family | Mean latency (ms) | Success | Pareto? |
+|---|---|---:|---:|:---|
+| Regression (RCP) | Regression | 0.086 ± 0.001 | 0.0% | ★ yes |
+| MIP (iter=3) | MIP | 0.333 ± 0.007 | 50.0% | ★ yes |
+| Linear MPC (H=10) | MPC | 1.17 ± 0.26 | 100.0% | ★ yes |
+| Flow Matching (T=2) | Flow Matching | 4.17 ± 0.03 | 50.0% | no |
+| DDPM (T=1) | DDPM | 2.22 ± 0.07 | 0.0% | no |
+| SmallVLA | VLA | 14.60 ± 0.59 | 0.0% | no |
+| Nonlinear MPC (iters=5) | MPC | 27.97 ± 0.09 | 100.0% | no |
+
+*Table 4: Selected points from the fast GPU image-based Pareto on `reaching`. Pareto-optimal points have no other point with both lower p50 latency and higher mean success. Latency is mean ± std over 100 timed calls.*
+
+The picture is now more nuanced. **MIP (3 iterations)** achieves 50% success at only 0.33 ms, trading a little latency for a big jump in success. **Linear MPC** still gives the full 100% success at 1.17 ms, so it Pareto-dominates everything to the right. **Flow Matching (T=2)** matches MIP's success but at 10× the latency, so it is dominated. **DDPM and SmallVLA** never solve the image-based task in this 2-episode snapshot: DDPM latencies scale linearly with sampling steps (up to 209 ms for T=100) with 0% success, and SmallVLA sits at 14.6 ms with 0% success.
+
+This is still a tiny image-based run, but it already shows that adding vision and language does not automatically rescue the learned methods. The open question for the full 5-seed, 50-episode GPU Pareto is whether more data and a larger VLA checkpoint move the frontier far enough left to challenge MPC.
 
 ---
 
