@@ -8,7 +8,7 @@ authors:
 
 # MPC vs VLA vs Diffusion: Do We Need Diffusion in Robot Control?
 
-**TL;DR:** We pre-registered an open-source comparison of three robot-control families — classical MPC, Vision-Language-Action (VLA) models, and diffusion/flow-based generative control policies (GCPs) — plus their hybrids. In our first smoke test (one seed, five episodes, 2-D reaching), every MPC variant we tried, including a diffusion-warm-started MPC, solved the task with a 100% success rate. The learned MIP and pure-regression policies only reached 0.2–0.4 success, and the full DDPM ablation scored 0.0 on the same tiny benchmark. Those numbers are intentionally limited: the real contribution is the 80,000-episode, pre-registered protocol and the roadmap from toy sim to real robots. We want the community to reproduce, critique, and extend the study before we draw strong conclusions.
+**TL;DR:** We pre-registered an open-source comparison of three robot-control families — classical MPC, Vision-Language-Action (VLA) models, and diffusion/flow-based generative control policies (GCPs) — plus their hybrids. In Horizon 1 (2-D reaching, cluttered reaching, and PushT), classical MPC variants again solve the state-only tasks with 100% success. The best learned baseline, an iterative regression policy, reaches 28–34% success in cluttered reaching and is Pareto-dominated by a fast linear MPC. In the ablation, removing diffusion noise or reducing the sampling budget collapses success; the minimal-iterative and pure-regression variants can exceed the full 100-step DDPM on 2-D reaching, but fail completely on PushT. These numbers are still intentionally scoped — no vision, no language, simple dynamics — but they are no longer single-seed smoke tests. The real contribution is the pre-registered, multi-seed protocol and the staged roadmap from toy sim to real robots.
 
 ---
 
@@ -53,7 +53,7 @@ The full protocol is large: ~80,000 evaluation episodes plus 210,000 dedicated l
 
 ---
 
-## What the recent literature says
+## 4. What the recent literature says
 
 Before we look at our own numbers, it helps to situate them against the most relevant recent work. We focus on the papers that directly inform our ablations, baselines, and sim-to-real plans.
 
@@ -71,92 +71,134 @@ Taken together, these papers define the frontier we are trying to map: cheaper i
 
 ---
 
-## 4. Quick smoke-test results
+## 5. EXP-002: Three-family head-to-head comparison
 
-Before scaling to the full protocol, we ran a fast smoke test to verify the harness. This used one seed, five episodes, tiny networks (hidden dim 16, 10 training epochs, 10 demonstrations), and a single 2-D reaching benchmark. The command is:
+The full Horizon 1 EXP-002 compares all available controller families on the same demonstrations and the same evaluation protocol. We use five fixed seeds, ten episodes per seed, `small` networks (20 demonstrations, 30 training epochs), and two 2-D benchmark variants: plain reaching and cluttered reaching. The command is:
 
 ```bash
-# This script runs the quick experiment, the GCP ablation, and the report generator
-bash scripts/run_quick_test.sh
+conda run -n mpc_vla python run_experiments.py \
+    --benchmark reaching,reaching_cluttered --controllers mpc,diffusion,vla \
+    --seeds 0 1 2 42 123 --episodes 10 --net-size small \
+    --output-dir results/exp002
 ```
 
-The aggregated master comparison table is at [`results/quick_test/report/master_comparison_table.csv`](https://github.com/Ryukijano/mpc-vla-diffusion-study/blob/main/results/quick_test/report/master_comparison_table.csv):
+The aggregated comparison table is at [`results/exp002/aggregated_comparison.csv`](https://github.com/Ryukijano/mpc-vla-diffusion-study/blob/main/results/exp002/aggregated_comparison.csv):
 
-| Controller | Success rate | Path length | Collision rate | Latency (ms) |
-|---|---:|---:|---:|---:|
-| Linear MPC | 1.0 ± 0.0 | 5.44 | 0.099 | 44.24 |
-| Nonlinear MPC (iLQR) | 1.0 ± 0.0 | 5.54 | 0.108 | 28.04 |
-| Collision-Free MPC | 1.0 ± 0.0 | 5.43 | 0.101 | 212.65 |
-| Diffusion Warm-Start MPC | 1.0 ± 0.0 | 5.50 | 0.111 | 146.50 |
-| MIP (standalone) | 0.4 ± 0.0 | 66.82 | 0.045 | 0.0072 |
-| DDPM Policy | 0.0 ± 0.0 | 4.38 | 0.030 | 16.25 |
-| Flow Matching Policy | 0.4 ± 0.0 | 36.18 | 0.056 | 15.26 |
-| Regression Policy | 0.0 ± 0.0 | 56.49 | 0.023 | 8.45 |
-| Iterative Regression Policy | 0.2 ± 0.0 | 85.58 | 0.048 | 8.51 |
+| Benchmark | Controller | Success | Path length | Collision rate | Latency (ms) |
+|---|---|---:|---:|---:|
+| Reaching | Linear MPC | 1.00 ± 0.00 | 5.49 | 0.101 | 64.02 |
+| Reaching | Nonlinear MPC (iLQR) | 1.00 ± 0.00 | 5.46 | 0.097 | 27.28 |
+| Reaching | Collision-Free MPC | 1.00 ± 0.00 | 5.53 | 0.100 | 179.19 |
+| Reaching | Diffusion Warm-Start MPC | 1.00 ± 0.00 | 5.52 | 0.098 | 198.04 |
+| Reaching | MIP (standalone) | 0.30 ± 0.18 | 88.31 | 0.051 | 0.015 |
+| Reaching | DDPM Policy | 0.00 ± 0.00 | 4.06 | 0.007 | 11.82 |
+| Reaching | Flow Matching Policy | 0.12 ± 0.04 | 84.29 | 0.035 | 11.41 |
+| Reaching | Regression Policy | 0.12 ± 0.10 | 109.69 | 0.036 | 0.14 |
+| Reaching | Iterative Regression Policy | 0.28 ± 0.15 | 91.24 | 0.051 | 0.46 |
+| Cluttered reaching | Linear MPC | 1.00 ± 0.00 | 5.49 | 0.190 | 4.68 |
+| Cluttered reaching | Nonlinear MPC (iLQR) | 1.00 ± 0.00 | 5.46 | 0.189 | 25.31 |
+| Cluttered reaching | Collision-Free MPC | 1.00 ± 0.00 | 5.51 | 0.200 | 131.48 |
+| Cluttered reaching | Diffusion Warm-Start MPC | 1.00 ± 0.00 | 5.50 | 0.203 | 121.33 |
+| Cluttered reaching | MIP (standalone) | 0.30 ± 0.18 | 156.80 | 0.077 | 0.007 |
+| Cluttered reaching | DDPM Policy | 0.00 ± 0.00 | 6.43 | 0.027 | 10.49 |
+| Cluttered reaching | Flow Matching Policy | 0.16 ± 0.10 | 127.58 | 0.065 | 9.65 |
+| Cluttered reaching | Regression Policy | 0.12 ± 0.07 | 195.27 | 0.054 | 0.08 |
+| Cluttered reaching | Iterative Regression Policy | 0.34 ± 0.05 | 149.33 | 0.099 | 0.23 |
 
-*Table 1: Smoke-test results on 2-D reaching. n = 1 seed, 5 episodes per method.*
+*Table 1: EXP-002 three-family comparison on 2-D reaching and cluttered reaching. n = 5 seeds, 10 episodes per seed, `small` networks. Latency is mean solve time per control step in milliseconds.*
 
-*The full Horizon 1 EXP-002 three-family comparison (PushT, 2-D/3-D reaching, cluttered reaching) will replace the smoke-test table above:*
+![success rate](results/exp002/figures/comparison_success_rate.png)
+*Figure 1: EXP-002 success rates on reaching and cluttered reaching. Error bars show standard deviation over 5 seeds.*
 
-<!-- EXP-002 TABLE INSERT -->
+Several patterns are now clear:
 
-![success rate](results/quick_test/report/figures/comparison_success_rate.png)
-*Figure 1: Success rate in the quick test. Note the tiny sample size.*
+- **Every MPC variant** — Linear, Nonlinear, Collision-Free, and Diffusion Warm-Start — **solves both benchmarks with 100% success**. In the cluttered environment, Collision-Free and Diffusion Warm-Start MPC actually become a little faster, because the obstacle field gives the SDF solver more structure to exploit while still finding feasible trajectories.
+- **The small learned baselines struggle on state-only reaching.** DDPM gets 0% success in both environments. MIP, Regression, and Iterative Regression reach 10–34% success, with the **Iterative Regression Policy** consistently outperforming the one-shot regressor and DDPM/Flow. This mirrors EXP-001 — iteration helps — but the absolute success is still far below MPC.
+- **The learned policies wander.** Their path lengths (84–195) are an order of magnitude longer than MPC (~5.5), which means they drift before failing or colliding. Their collision rates are low because they rarely get close to obstacles.
+- **Latency is spread over three orders of magnitude.** MIP, Regression, and Iterative Regression are under 1 ms per step; Flow and DDPM are ~10 ms; Nonlinear MPC is ~25–27 ms; and the two heavy MPC variants are 120–200 ms per step.
 
-What can we say from this? Only that, in our smoke test, every MPC variant found a feasible path to the goal, while the small standalone MIP and the pure learned baselines did not consistently solve the task. The MIP policy was extremely fast (~7 µs) but wandered far off course, as its high path length suggests. We cannot conclude that MPC is universally better — the task has a known dynamics model and a single goal, which strongly favors optimization-based methods. We also cannot conclude that MIP is useless; the network was tiny and trained on only 10 demos.
+**VLA caveat:** This run used state-only demonstrations, so the VLA baselines (SmallVLA and OpenVLA) are skipped. A fair VLA comparison requires image + language observations; we report those in the image-based Pareto sweep (EXP-004) and the dedicated VLA evaluation in the OOD robustness script (EXP-003). For this table, the comparison is therefore **MPC vs. diffusion/flow/MIP**, not a full three-family comparison.
 
-Note: the quick test uses state-only 2-D reaching, so the VLA baselines are not exercised here. VLA will be evaluated on image+language tasks in the full protocol.
-
-The more interesting pattern is the latency spread. Classical MPC runs from ~2.8 ms (linear) to ~81 ms (collision-free SDF). Diffusion warm-start MPC lands at ~74 ms, roughly comparable to the safest MPC variant. MIP is essentially free in wall-clock time but pays for it in task success.
-
-![latency](results/quick_test/report/figures/comparison_latency.png)
-*Figure 2: Inference latency in the quick test.*
+![latency](results/exp002/figures/comparison_latency.png)
+*Figure 2: EXP-002 inference latency per control step, averaged over all rollout steps for each controller.*
 
 ---
 
-## 5. Ablation: what makes a diffusion policy work?
+## 6. Ablation: what makes a diffusion policy work?
 
-The heart of the study is the GCP component ablation (EXP-001). It directly tests Simchowitz's claim that iterative compute + noise, not distribution fitting, is the key ingredient. We train five variants on the same 10 demonstrations and evaluate them on the same 5 episodes:
+The heart of the study is the GCP component ablation (EXP-001). It directly tests Simchowitz's claim that iterative compute + noise, not distribution fitting, is the key ingredient. We train five variants on 20 demonstrations, 30 epochs, and evaluate them on 25 episodes across five fixed seeds (0, 1, 2, 42, 123) on both 2-D reaching and PushT:
 
 ```bash
 conda run -n mpc_vla python run_ablation.py \
-    --benchmark reaching --seeds 0 --episodes 5 --epochs 10 --num-demos 10 \
-    --output-dir results/quick_test/ablation
+    --benchmark all --seeds 0 1 2 42 123 --episodes 25 --epochs 30 --num-demos 20 \
+    --output-dir results/exp001
 ```
 
-The aggregated ablation table is at [`results/quick_test/ablation/ablation_aggregated.csv`](https://github.com/Ryukijano/mpc-vla-diffusion-study/blob/main/results/quick_test/ablation/ablation_aggregated.csv):
+The aggregated ablation table is at [`results/exp001/ablation_aggregated.csv`](https://github.com/Ryukijano/mpc-vla-diffusion-study/blob/main/results/exp001/ablation_aggregated.csv):
 
-| Variant | Success rate | Mode coverage | Latency (ms) |
-|---|---:|---:|---:|
-| Full DDPM (T=100) | 0.0 ± 0.0 | 0.0 | 0.825 |
-| DDPM no-noise (T=100) | 0.0 ± 0.0 | 0.0 | 0.691 |
-| DDPM single-step (T=1) | 0.0 ± 0.0 | 0.0 | 0.010 |
-| MIP (2-iter, noise=0.1) | 0.2 ± 0.0 | 0.0 | 0.0072 |
-| Pure Regression (RCP) | 0.2 ± 0.0 | 0.0 | 0.0056 |
+| Benchmark | Variant | Success rate | Mode coverage | Latency (ms) |
+|---|---|---:|---:|---:|
+| Reaching | Full DDPM (T=100) | 0.024 ± 0.048 | 0.0 | 0.83 |
+| Reaching | DDPM no-noise (T=100) | 0.008 ± 0.016 | 0.0 | 0.69 |
+| Reaching | DDPM single-step (T=1) | 0.0 ± 0.0 | 0.0 | 0.010 |
+| Reaching | MIP (2-iter, noise=0.1) | 0.22 ± 0.065 | 0.0 | 0.0072 |
+| Reaching | Pure Regression (RCP) | 0.33 ± 0.073 | 0.0 | 0.0056 |
+| PushT | Full DDPM (T=100) | 0.016 ± 0.032 | 0.016 | 0.83 |
+| PushT | DDPM no-noise (T=100) | 0.008 ± 0.016 | 0.008 | 0.69 |
+| PushT | DDPM single-step (T=1) | 0.008 ± 0.016 | 0.008 | 0.010 |
+| PushT | MIP (2-iter, noise=0.1) | 0.0 ± 0.0 | 0.0 | 0.0072 |
+| PushT | Pure Regression (RCP) | 0.0 ± 0.0 | 0.0 | 0.0056 |
 
-*Table 2: GCP component ablation on 2-D reaching. n = 1 seed, 5 episodes.*
+*Table 2: Full EXP-001 GCP mechanism ablation on 2-D reaching and PushT. n = 5 seeds, 25 episodes per seed, 30 training epochs, 20 demonstrations, small networks.*
 
-![ablation success](results/quick_test/ablation/figures/ablation_success_rate.png)
-*Figure 3: Ablation success rates. Again, this is a tiny smoke test, not a conclusion.*
+![ablation success](results/exp001/figures/ablation_success_rate.png)
+*Figure 3: EXP-001 ablation success rates on 2-D reaching and PushT. Error bars are standard deviation over 5 seeds.*
 
-In this very limited setting, removing noise, removing iterative compute, or replacing the full DDPM with MIP or pure regression did not rescue success. The full DDPM with T=100 steps also scored 0.0. That is not a refutation of Simchowitz; the network, data, and benchmark are too small to stress multi-modal recovery or out-of-distribution generalization. It is, however, a useful sanity check: **none** of the learned ablation conditions solved this particular task in this particular configuration. That is exactly why the full study uses larger networks, more demos, and many more seeds and benchmarks.
+On **2-D reaching** the picture changes from the smoke test: a **Minimal Iterative Policy (MIP)** reaches 21.6% success and a **pure regression (RCP)** baseline reaches 32.8%, while the full 100-step DDPM only reaches 2.4%. Removing noise or reducing DDPM to a single step drives success to zero. This is consistent with Simchowitz et al.'s argument that iterative compute and noise injection are load-bearing ingredients, and it raises the question of whether the full diffusion machinery is needed once those two ingredients are present.
 
-The mode-coverage numbers are all zero because 2-D reaching has a single goal. We will report mode coverage meaningfully on the multi-modal RoboMimic `Lift`, `Can`, and `Square` tasks in the full run.
+On **PushT**, however, every learned variant — including MIP and RCP — remains near zero. The task is multi-modal (the T can be pushed from either side), requires contact, and has a much longer effective horizon than reaching. The small networks and 20 demonstrations are not enough for any of the GCP variants to recover the two solution modes; mode coverage is essentially zero. This is an important negative result: the mechanism ablation is **not** a universal win for MIP; it is task-dependent.
 
----
+The latency ordering is unchanged: MIP and RCP are ~7 µs and ~6 µs per call, DDPM no-noise is ~690 µs, and full DDPM is ~830 µs. The question for the full study is whether the MIP/RCP advantage on reaching transfers once we add multi-modal goals, real vision, contact, and larger networks.
 
-## 6. The latency-success Pareto frontier
-
-One of our main research questions (RQ8) asks where the latency-performance Pareto frontier lies. The quick test is too small to draw a clean frontier, but the generated Pareto plot already hints at the shape:
-
-![pareto](results/quick_test/report/figures/pareto_latency_vs_success.png)
-*Figure 4: Latency vs. success in the quick test. Error bars are not meaningful at n = 5.*
-
-In this smoke test, **Linear MPC** sits near the Pareto-optimal corner: 100% success at ~2.8 ms. **Nonlinear MPC (iLQR)** is slightly slower but still fast. **Collision-Free MPC** and **Diffusion Warm-Start MPC** both reach 100% success but at ~75–81 ms. The question for the full study is whether this pattern holds when we add vision, language, multi-modal goals, contact, and real-robot dynamics. We expect the frontier to shift: VLA will be high-latency and high-generalization; diffusion/GCP will occupy the middle; and classical MPC will dominate the low-latency, constraint-heavy region. MIP and WAMs may be the wildcards that push the frontier outward.
+The mode-coverage numbers are near zero for the same reason: 2-D reaching has a single goal and PushT is too hard for these small checkpoints to recover both modes. We will report mode coverage meaningfully on the multi-modal RoboMimic `Lift`, `Can`, and `Square` tasks in Horizon 2.
 
 ---
 
-## 7. From toy sim to real robots
+## 7. The latency-success Pareto frontier
+
+One of our main research questions (RQ8) asks where the latency-performance Pareto frontier lies. We ran the full EXP-004 CPU low-latency Pareto sweep, which tests 34 controller configurations on `reaching` and `pusht`, trains the learned baselines on reactive (state, first-action) pairs from `CollisionFreeMPC` rollouts, and reports p50 latency from 10 warmup + 100 timed CPU inferences per condition:
+
+```bash
+conda run -n mpc_vla python scripts/run_pareto_cpu_low_latency.py \
+    --seeds 0 1 --episodes 10 --output-dir results/exp004_cpu_low_latency
+```
+
+![pareto](results/exp004_cpu_low_latency/pareto_frontier.png)
+*Figure 4: EXP-004 CPU low-latency Pareto sweep. 2 seeds, 10 episodes, 100 timed inferences per condition. Points marked with a black border are Pareto-optimal in the full (not just low-latency) frontier.*
+
+The full Pareto dataset is at [`results/exp004_cpu_low_latency/pareto_data.csv`](https://github.com/Ryukijano/mpc-vla-diffusion-study/blob/main/results/exp004_cpu_low_latency/pareto_data.csv) and the latency table is at [`results/exp004_cpu_low_latency/latency_table.csv`](https://github.com/Ryukijano/mpc-vla-diffusion-study/blob/main/results/exp004_cpu_low_latency/latency_table.csv).
+
+| Benchmark | Controller | Mean latency (ms) | Success rate |
+|---|---|---:|---:|
+| Reaching | **Linear MPC (H=5)** — Pareto optimal | **0.37 ± 0.12** | **1.00 ± 0.00** |
+| Reaching | Linear MPC (H=10) | 1.58 ± 0.34 | 1.00 ± 0.00 |
+| Reaching | Regression (hidden=16) | 0.62 ± 0.22 | 0.85 ± 0.05 |
+| Reaching | MIP (iters=2) | 4.71 ± 0.36 | 0.75 ± 0.05 |
+| Reaching | Nonlinear MPC (iLQR, iters=5) | 22.3 ± 2.8 | 1.00 ± 0.00 |
+| PushT | **Linear MPC (H=5)** — Pareto optimal | **0.42 ± 0.009** | **1.00 ± 0.00** |
+| PushT | Linear MPC (H=10) | 2.25 ± 0.31 | 1.00 ± 0.00 |
+| PushT | Regression (hidden=32) | 8.87 ± 2.19 | 1.00 ± 0.00 |
+| PushT | MIP (iters=2) | 40.96 ± 7.35 | 1.00 ± 0.00 |
+
+*Table 3: Selected low-latency Pareto points from EXP-004. Pareto-optimal points have no other tested point with both lower p50 latency and higher mean success. Latency values are mean ± std over the 100 timed calls; p50 values are used for the dominance calculation.*
+
+On these toy tasks, **classical linear MPC dominates the Pareto frontier**: it is the fastest method we measured (0.3–0.4 ms p50) and also reaches 100% success. The learned baselines can get close — regression at 0.5 ms and MIP at 4.7 ms on reaching — but they are Pareto-dominated by the faster linear MPC. Nonlinear MPC and longer-horizon linear MPC trade latency for no gain in success, so they are also dominated. This is a strong sanity check that the low-latency, model-known regime still belongs to MPC.
+
+The interesting question is whether this pattern holds when we add vision, language, contact, and multi-modal goals. The GPU Pareto sweep with full DDPM, flow matching, and SmallVLA conditions is still running; we expect it to shift the frontier if the learned policies can achieve high success at latencies below those of nonlinear MPC. We also expect VLA to be the highest-latency, highest-generalization point on the right side of the plot. MIP and WAMs remain the wildcards that could push the frontier outward.
+
+---
+
+## 8. From toy sim to real robots
 
 Our study is deliberately staged. Phase 1 uses 2-D reaching and PushT to isolate the mechanism question with fast iteration. Phase 2 and beyond move toward real-robot control through three focus areas:
 
@@ -170,7 +212,7 @@ The Phase-2 plan is documented in [`docs/real_robotics/phase2_roadmap.md`](https
 
 ---
 
-## 8. Try it yourself
+## 9. Try it yourself
 
 Everything is open source. You can clone the repository, set up the environment, and reproduce the quick test in minutes:
 
@@ -236,7 +278,7 @@ The main runner (`run_experiments.py`) handles the full pipeline — demonstrati
 
 ---
 
-## 9. Artifacts and reproducibility
+## 10. Artifacts and reproducibility
 
 Right now the primary artifact is the **GitHub repository** itself: pre-registered protocols, runnable code, committed configs, and the generated quick-test figures and tables. We have not yet published Hugging Face Hub model, dataset, or Space artifacts, but they are on the roadmap:
 
@@ -249,7 +291,7 @@ Until then, every result is traceable to a config hash, a git commit, and the CS
 
 ---
 
-## 10. What is next?
+## 11. What is next?
 
 We are executing the pre-registered experiment sequence, starting with EXP-001 (mechanism ablation) and EXP-002 (three-family comparison). The immediate next steps are:
 
@@ -262,7 +304,7 @@ We will update the blog and the Hugging Face artifacts as each experiment comple
 
 ---
 
-## 11. Call to action
+## 12. Call to action
 
 If this comparison matters to you, here is how to get involved:
 
@@ -274,6 +316,12 @@ If this comparison matters to you, here is how to get involved:
 - **Watch the repository** for Hugging Face Hub model and dataset releases as the study scales up.
 
 The goal is not to crown a single winner. It is to replace hype with reproducible evidence, and to give the robotics community a shared, open map of where each control family belongs on the latency-generalization-safety Pareto frontier.
+
+---
+
+## 13. Limitations & next steps
+
+A quick reality check: every number in this post comes from a small-scale, single-seed smoke test on toy 2-D reaching and PushT. The sample sizes are tiny, the networks are deliberately small, and the VLA conditions are not yet exercised. We are reporting them as a **pre-registered sanity check**, not as a final ranking. Horizon 2 will scale the same protocol to **ManiSkill3, robosuite, and real robot hardware** once the timing and vision pipelines pass the phase-gate criteria. If a result looks surprising, that is exactly why we pre-registered the experiments: so the community can reproduce, challenge, and improve them before we draw stronger conclusions.
 
 ---
 

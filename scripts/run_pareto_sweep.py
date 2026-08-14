@@ -816,7 +816,7 @@ def run_pareto_sweep(
 
             # 5. Measure Latency on First Seed
             if seed == seeds[0]:
-                print("\n  [Latency] Profiling high-precision inference latency (100 warmup, 1000 timed calls)...")
+                print(f"\n  [Latency] Profiling high-precision inference latency ({n_warmup} warmup, {n_timed} timed calls)...")
                 for c_name, c_spec in conditions_dict.items():
                     lat_res = profile_latency(
                         c_spec["profile_fn"],

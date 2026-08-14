@@ -217,98 +217,34 @@ class _FallbackPushT:
 def make_benchmark(name: str, seed: int = 0):
     """Return a benchmark instance.
 
-    Tries the real ``benchmarks`` package and falls back to the built-in
-    point-mass tasks if it is unavailable.
+    The low-latency CPU sweep uses the built-in point-mass reaching/PushT
+    fallbacks because they share the same double-integrator dynamics used by
+    the MPC controllers and have a fixed goal per seed.  If the ``benchmarks``
+    package is unavailable these fallbacks are still usable.
     """
     name = name.lower()
     if name in ("reaching", "reaching_2d"):
         try:
-            from benchmarks import ReachingEnv
+            from benchmarks import ReachingEnv  # noqa: F401
 
-            # Wrap the real reaching env so it has the same attributes as the
-            # fallback (fixed goal, point-mass dynamics, etc.).
-            return _WrappedReaching(ReachingEnv(dim=2, dt=0.05, max_steps=80, seed=seed))
-        except Exception as exc:
-            warnings.warn(f"Real Reaching unavailable ({exc}); using fallback.")
-            return _FallbackReaching(seed=seed, cluttered=False)
+            _have_real = True
+        except Exception:
+            _have_real = False
+        if _have_real:
+            print("    [benchmarks] ReachingEnv available; using point-mass fallback for MPC compatibility.")
+        return _FallbackReaching(seed=seed, cluttered=False)
     elif name in ("pusht", "pusht_2d"):
         try:
-            from benchmarks import PushTEnv
+            from benchmarks import PushTEnv  # noqa: F401
 
-            # Real PushT is a block-pushing contact task that is not directly
-            # compatible with the point-mass MPC controllers in this CPU sweep,
-            # so we use the point-mass fallback even when benchmarks is on path.
-            warnings.warn("PushT uses the point-mass fallback for this CPU sweep.")
+            _have_real = True
         except Exception:
-            pass
+            _have_real = False
+        if _have_real:
+            print("    [benchmarks] PushTEnv available; using point-mass fallback for MPC compatibility.")
         return _FallbackPushT(seed=seed)
     else:
         raise ValueError(f"Unknown benchmark: {name}")
-
-
-class _WrappedReaching:
-    """Wrap ``benchmarks.ReachingEnv`` to expose a fixed-goal MPC interface."""
-
-    name = "Reaching"
-
-    def __init__(self, env):
-        self.env = env
-        self.dt = float(env.dt)
-        self.dyn = PointMass2D(mass=1.0, dt=self.dt)
-        self.state_dim = 4
-        self.action_dim = 2
-        self.goal_tol = float(env.success_threshold)
-        self.max_steps = int(env._max_steps)
-        self.obstacles = [
-            CircleObstacle(o.center, o.radius) for o in env.obstacles
-        ]
-        self.world = SDFWorld(dim=2)
-        for o in self.obstacles:
-            self.world.add_sphere(o.center.tolist(), o.radius)
-        self._state: Optional[np.ndarray] = None
-        self._target: Optional[np.ndarray] = None
-        self.reset()
-
-    def reset(self) -> np.ndarray:
-        obs = self.env.reset()
-        self._state = np.asarray(obs, dtype=float).copy()
-        self._target = np.asarray(self.env.get_target(), dtype=float).copy()
-        # Fix a full-state goal for MPC and keep it constant across resets.
-        self.goal = np.array(
-            [self._target[0], self._target[1], 0.0, 0.0]
-        )
-        return self._state
-
-    def step(self, state: np.ndarray, action: np.ndarray) -> np.ndarray:
-        self.env._state = np.asarray(state, dtype=np.float64).copy()
-        obs, _, _, _ = self.env.step(action)
-        return np.asarray(obs, dtype=float).copy()
-
-    def is_success(self, state: Optional[np.ndarray] = None) -> bool:
-        if state is not None:
-            self.env._state = np.asarray(state, dtype=np.float64).copy()
-        return self.env.is_success()
-
-    def is_collision(self, state: Optional[np.ndarray] = None) -> bool:
-        if state is not None:
-            self.env._state = np.asarray(state, dtype=np.float64).copy()
-        return self.env.is_collision()
-
-    def make_costs(self):
-        goal = self.goal
-        Q = np.diag([10.0, 10.0, 1.0, 1.0])
-        R = np.diag([0.1, 0.1])
-        Qf = np.diag([100.0, 100.0, 10.0, 10.0])
-
-        def stage_cost(x, u, k=None):
-            dx = x - goal
-            return float(dx @ Q @ dx + u @ R @ u)
-
-        def terminal_cost(x):
-            dx = x - goal
-            return float(dx @ Qf @ dx)
-
-        return stage_cost, terminal_cost, Q, R, Qf
 
 
 # ---------------------------------------------------------------------------
@@ -335,7 +271,13 @@ def collect_demonstrations(
     horizon: int = 16,
     seed: int = 0,
 ) -> List[Tuple[np.ndarray, np.ndarray]]:
-    """Collect (state, action_sequence) expert demos using CollisionFree MPC."""
+    """Collect (state, action) reactive expert demos using receding-horizon CFMPC.
+
+    For each demo we run the collision-free MPC in closed loop from a sampled
+    start and record every (state, first_action) pair.  This gives the learned
+    baselines a reactive training distribution over the whole trajectory, not
+    just the initial states.
+    """
     stage_cost, term_cost, _, _, _ = bench.make_costs()
     u_bounds = get_u_bounds(bench)
 
@@ -357,15 +299,24 @@ def collect_demonstrations(
         attempts += 1
         s = bench.reset()
         u0 = np.zeros((horizon, bench.action_dim))
+        state = s.copy()
+        traj_pairs: List[Tuple[np.ndarray, np.ndarray]] = []
         try:
-            U = mpc.solve(s, warm_start=u0)
-            if np.isnan(U).any():
-                continue
-            demos.append((s.copy(), U.copy()))
+            for _ in range(bench.max_steps):
+                U = mpc.solve(state, warm_start=u0)
+                if np.isnan(U).any():
+                    break
+                traj_pairs.append((state.copy(), U[[0]].copy()))
+                state = bench.step(state, U[0])
+                u0 = np.vstack([U[1:], U[-1:]])
+                if bench.is_success(state) or bench.is_collision(state):
+                    break
+            if len(traj_pairs) >= 5:
+                demos.extend(traj_pairs)
         except Exception:
             continue
 
-    print(f"  Collected {len(demos)}/{n_demos} expert demonstrations")
+    print(f"  Collected {len(demos)} reactive expert (state, action) pairs from {attempts} rollouts")
     return demos
 
 
@@ -375,7 +326,15 @@ def train_learned_controllers(
     horizon: int,
     seed: int = 0,
 ) -> Dict[str, Any]:
-    """Train the Regression and MIP baselines on the collected demos."""
+    """Train single-step Regression and MIP baselines.
+
+    The expert MPC demos are full action sequences, but for a low-latency
+    reactive controller we train the learned baselines to predict only the
+    first action (horizon=1).  This reduces output dimensionality and focuses
+    the small MLPs on the receding-horizon control decision.
+    """
+    single_step_demos = [(s.copy(), U[:1].copy()) for s, U in demos]
+    learned_horizon = 1
     state_dim = bench.state_dim
     action_dim = bench.action_dim
     u_bounds = get_u_bounds(bench)
@@ -388,15 +347,15 @@ def train_learned_controllers(
         print(f"  [Train] {name} ...")
         rcp = RegressionPolicy(
             action_dim=action_dim,
-            horizon=horizon,
+            horizon=learned_horizon,
             obs_dim=state_dim,
             hidden_dim=hidden_dim,
             num_layers=3,
             device="cpu",
         )
         rcp.train(
-            demos,
-            num_epochs=30,
+            single_step_demos,
+            num_epochs=80,
             batch_size=min(16, len(demos)),
             lr=1e-3,
             verbose=False,
@@ -427,7 +386,7 @@ def train_learned_controllers(
     print("  [Train] MIP (5 iters) ...")
     mip = IterativeRegressionPolicy(
         action_dim=action_dim,
-        horizon=horizon,
+        horizon=learned_horizon,
         obs_dim=state_dim,
         num_iterations=5,
         hidden_dim=64,
@@ -435,8 +394,8 @@ def train_learned_controllers(
         device="cpu",
     )
     mip.train(
-        demos,
-        num_epochs=30,
+        single_step_demos,
+        num_epochs=80,
         batch_size=min(16, len(demos)),
         lr=1e-3,
         verbose=False,
@@ -854,25 +813,27 @@ def run_pareto_cpu_low_latency(
                 "policy_fn": lambda s, _m=_m, _r=ref: _m.solve(s, _r).control,
             }
 
-        # Nonlinear (collision-free) MPC / iLQR sweep
+        # Nonlinear MPC / iLQR sweep
         for it in (1, 3, 5, 10, 15):
             c_name = f"Nonlinear MPC (iters={it})"
-            nmpc = CollisionFreeMPC(
+            nmpc = NonlinearMPC(
                 bench.dyn.dynamics,
                 stage_cost,
                 terminal_cost,
-                bench.world,
                 horizon=horizon,
                 u_bounds=u_bounds,
-                collision_weight=100.0,
-                ilqr_iters=it,
             )
+            _it = it
             conditions_dict[c_name] = {
                 "family": "Nonlinear MPC",
                 "category": "Nonlinear MPC",
                 "parameter": f"iters={it}",
-                "profile_fn": lambda _m=nmpc, _s=sample_state: _m.solve(_s)[0],
-                "policy_fn": lambda s, _m=nmpc: _m.solve(s)[0],
+                "profile_fn": lambda _m=nmpc, _s=sample_state, _it=_it: _m.solve(
+                    _s, max_iter=_it
+                )["action"],
+                "policy_fn": lambda s, _m=nmpc, _it=_it: _m.solve(s, max_iter=_it)[
+                    "action"
+                ],
             }
 
         # Add learned baselines
@@ -1145,8 +1106,8 @@ def main():
     parser.add_argument(
         "--n-demos",
         type=int,
-        default=30,
-        help="Number of expert demonstrations to collect",
+        default=300,
+        help="Number of reactive expert (state, action) pairs to collect",
     )
     parser.add_argument(
         "--output-dir",

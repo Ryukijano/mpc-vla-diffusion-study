@@ -7,10 +7,10 @@
   "python_version": "3.11.15",
   "python_executable": "/home/aimsgroupuol/miniconda3/envs/mpc_vla/bin/python",
   "git": {
-    "commit_hash": "a3f9fc99a048277d0db1be947cc0d72c9a08a609",
+    "commit_hash": "ea6566a30b434247bbf3186edbe99c3475c4de26",
     "branch": "main",
     "clean": false,
-    "status_summary": "M results/env_info.json\n M results/exp004_cpu_low_latency_smoke/latency_table.csv\n M results/exp004_cpu_low_latency_smoke/metrics_summary.json\n M results/exp004_cpu_low_latency_smoke/pareto_data.csv\n M results/exp004_cpu_low_latency_smoke/pareto_frontier.png\n M scripts/package_hf_models.py\n M scripts/run_horizon1.sh\n M scripts/run_pareto_cpu_low_latency.py\n?? data/mpc_expert_demos_state.parquet\n?? results/exp001/\n?? results/hf_artifacts/DATASET_CARDS/\n?? results/hf_artifacts/MODEL_CARDS/\n?? results/hf_datasets/"
+    "status_summary": "M docs/blogging/hf_blog_draft.md\n M results/env_info.json\n M results/exp001/ablation_aggregated.csv\n M results/exp001/ablation_comparison.csv\n M results/exp001/ablation_results.json\n M results/exp001/figures/ablation_latency.png\n M results/exp004_cpu_low_latency_smoke/latency_table.csv\n M results/exp004_cpu_low_latency_smoke/metrics_summary.json\n M results/exp004_cpu_low_latency_smoke/pareto_data.csv\n M results/exp004_cpu_low_latency_smoke/pareto_frontier.png\n M scripts/run_pareto_cpu_low_latency.py\n?? _test_mpc.py\n?? _test_mpc2.py\n?? _test_speed.py\n?? scripts/debug_ilqr.py\n?? scripts/debug_ilqr2.py\n?? scripts/debug_latency.py\n?? scripts/debug_rcp.py\n?? scripts/run_ood_evaluation.py"
   },
   "cpu_model": "aarch64",
   "cpu_count_logical": 20,
