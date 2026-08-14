@@ -37,21 +37,21 @@ ${RUN} run_ablation.py \
   --num-demos 50 \
   --output-dir results/exp001
 
-# 3. EXP-002: Three-family comparison
+# 3. EXP-002: Three-family comparison (reaching only for first full run)
 echo "[3/4] Running EXP-002: Three-Family Comparison..."
 ${RUN} run_experiments.py \
-  --benchmark reaching,reaching_cluttered,pusht \
+  --benchmark reaching,reaching_cluttered \
   --controllers mpc,diffusion,vla \
   --seeds 0 1 2 42 123 \
-  --episodes 25 \
+  --episodes 10 \
   --output-dir results/exp002
 
-# 4. EXP-004: Latency Pareto sweep
+# 4. EXP-004: Latency Pareto sweep (reaching focus)
 echo "[4/4] Running EXP-004: Latency-Performance Pareto Sweep..."
 ${RUN} scripts/run_pareto_sweep.py \
-  --benchmark all \
+  --benchmark reaching \
   --seeds 0 1 2 42 123 \
-  --episodes 25 \
+  --episodes 10 \
   --n-warmup 100 --n-timed 1000 \
   --device cuda \
   --output-dir results/exp004
