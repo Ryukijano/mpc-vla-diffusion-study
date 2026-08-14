@@ -40,11 +40,10 @@ ${RUN} run_ablation.py \
 # 3. EXP-002: Three-family comparison
 echo "[3/4] Running EXP-002: Three-Family Comparison..."
 ${RUN} run_experiments.py \
-  --benchmarks reaching,reaching_cluttered,pusht \
+  --benchmark reaching,reaching_cluttered,pusht \
   --controllers mpc,diffusion,vla \
   --seeds 0 1 2 42 123 \
   --episodes 25 \
-  --horizon 16 \
   --output-dir results/exp002
 
 # 4. EXP-004: Latency Pareto sweep
