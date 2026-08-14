@@ -407,3 +407,65 @@ All on-disk measurements below were taken from the DGX Spark (`mpc_vla` conda en
 | Quick-test ablation figures | `results/quick_test/ablation/figures/` | 212 KB |
 
 These numbers are the basis for the size estimates in the artifact table.
+
+---
+
+## 8. Local packaging verification (performed)
+
+The following dry-runs were executed in the `mpc_vla` conda environment on the DGX Spark to prove the HF packaging workflow and card generation work without uploading anything.
+
+### 8.1 Model packaging dry-run
+
+| Step | Command | Output directory / key files | Status |
+|---|---|---|---|
+| Single placeholder model card | `conda run -n mpc_vla python scripts/package_hf_models.py --checkpoint /tmp/hf_model_test/dummy.pt --repo-id Ryukijano/test-model --dry-run` | `dist/hf_models/test-model/README.md`, `dist/hf_models/test-model/config.yaml`, `dist/hf_models/test-model/dummy.pt` | PASS |
+| All four quick baselines | `conda run -n mpc_vla python scripts/package_hf_models.py --output-dir dist/hf_models` | `dist/hf_models/small_vla/`, `dist/hf_models/ddpm/`, `dist/hf_models/flow_matching/`, `dist/hf_models/mip/` | PASS |
+
+Each package contains a `README.md` model card, `config.yaml`, `example_inference.py`, and a verified `.pt`/`.npz` checkpoint.
+
+### 8.2 Dataset packaging dry-run
+
+| Step | Command | Output directory / key files | Status |
+|---|---|---|---|
+| Quick MPC demo dataset | `conda run -n mpc_vla python scripts/package_hf_dataset.py --output-dir results/hf_datasets/mpc_expert_demos --n-episodes 2 --max-steps 10` | `results/hf_datasets/mpc_expert_demos/README.md`, `mpc_expert_demos_state.npz`, `mpc_expert_demos_state.parquet`, `mpc_expert_demos_images.npz` | PASS |
+
+### 8.3 Trained release checkpoints
+
+`scripts/train_and_export_checkpoints.py` produced and verified the four trained PushT checkpoints:
+
+| Checkpoint | File | Size | Params | Status |
+|---|---|---|---|---|
+| SmallVLA | `results/checkpoints/small_vla_pusht.pt` | 571 MB | 149,436,944 | PASS |
+| DDPM Diffusion Policy | `results/checkpoints/ddpm_pusht.pt` | 43 MB | 11,058,050 | PASS |
+| Flow Matching Policy | `results/checkpoints/flow_matching_pusht.pt` | 43 MB | 11,058,050 | PASS |
+| Minimal Iterative Policy (MIP) | `results/checkpoints/mip_pusht.npz` | 59 KB | 7,072 | PASS |
+
+The verification results are recorded in `results/checkpoints/release_manifest.json`.
+
+### 8.4 Artifact card directories
+
+Generated model and dataset cards are also copied to `results/hf_artifacts/` for local inspection:
+
+- `results/hf_artifacts/MODEL_CARDS/`
+  - `small_vla_README.md`
+  - `ddpm_README.md`
+  - `flow_matching_README.md`
+  - `mip_README.md`
+  - `test_model_dry_run_README.md`
+- `results/hf_artifacts/DATASET_CARDS/`
+  - `mpc_expert_demos_README.md`
+
+### 8.5 Verification script
+
+Run the bundled shell gate to re-check the artifacts and the Gradio Space:
+
+```bash
+bash /home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study/scripts/verify_hf_artifacts.sh
+```
+
+This script:
+1. Confirms the four checkpoints exist under `results/checkpoints/`.
+2. Confirms the dataset package exists under `results/hf_datasets/mpc_expert_demos`.
+3. Confirms `demo_space/app.py` exists and compiles with `python -m py_compile`.
+
+It exits `0` when all checks pass and `1` otherwise.

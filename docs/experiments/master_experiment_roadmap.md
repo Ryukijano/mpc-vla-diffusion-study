@@ -714,39 +714,42 @@ All generated assets are structured for direct publication on the Hugging Face H
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| EXP-001 — GCP Mechanism Ablation | **In-progress / partial** | Quick smoke test on 2-D Reaching only (`results/quick_test/ablation/`); full 5-condition × 2-benchmark run not yet completed. |
-| EXP-002 — Three-Family Comparison | **In-progress / partial** | Quick smoke test on 2-D Reaching only, `mpc` + `diffusion` (no VLA); full run not completed. |
+| EXP-001 — GCP Mechanism Ablation | **In-progress** | Medium 25-episode × 5-seed run complete (`results/exp001/`, PushT + Reaching). Full 100-episode pre-registered run still pending. |
+| EXP-002 — Three-Family Comparison | **Pending** | No full run; only quick smoke on `reaching` (`results/quick_test/`, no VLA). |
 | EXP-003 — OOD Robustness | **Pending** | No outputs. |
-| EXP-004 — Latency-Performance Pareto | **Pending** | Only quick-smoke Pareto figure exists. |
+| EXP-004 — Latency-Performance Pareto | **In-progress (smoke)** | CPU-only low-latency smoke complete (`results/exp004_cpu_low_latency_smoke/`). Canonical GPU Pareto sweep not started. |
 | EXP-005..010 — Horizon 2 | **Pending** | Protocol dirs for EXP-005–008 exist; EXP-009 and EXP-010 not yet created. |
-| Model Checkpoints | **Partial** | Four PushT baseline checkpoints verified in `results/checkpoints/`; full per-experiment checkpoint trees missing. |
-| Hugging Face Hub Artifacts | **Pending** | Packaging scripts exist but no repos created or uploaded. |
-| HF Community Blog | **Draft / blocked** | Draft at `docs/blogging/hf_blog_draft.md`; publication waiting on full Horizon 1 results and Hub artifacts. |
+| Model Checkpoints | **Partial** | Four PushT baseline checkpoints verified in `results/checkpoints/`; full per-condition checkpoint trees not yet produced. |
+| Hugging Face Hub Artifacts | **Packaged locally / upload pending** | `dist/hf_models/` and `dist/hf_datasets/` are populated; `results/hf_artifacts/` card templates and upload checklist exist. No Hub repos created or uploaded. |
+| HF Community Blog | **Draft / blocked** | Draft at `docs/blogging/hf_blog_draft.md`; publication waiting on full Horizon 1 results and actual Hub uploads. |
 
 ### 8.2 What Is Already on Disk
 
+- **EXP-001 medium run:** `results/exp001/` contains 5-seed, 25-episode ablation outputs for PushT and 2-D Reaching (`ablation_results.json`, `ablation_aggregated.csv`, `ablation_comparison.csv`, 3 PNGs). This is the run from `scripts/run_horizon1.sh:32–38`.
+- **EXP-004 CPU smoke:** `results/exp004_cpu_low_latency_smoke/` contains 1-seed, 2-episode, 17-condition Pareto data on 2-D Reaching from `scripts/run_pareto_cpu_low_latency.py`.
 - **Quick smoke-test results:** `results/quick_test/` (1 seed, 5 episodes, `reaching` only, `mpc` + `diffusion` controllers).
 - **Baseline checkpoints:** `results/checkpoints/{small_vla_pusht.pt, ddpm_pusht.pt, flow_matching_pusht.pt, mip_pusht.npz}` with `release_manifest.json`.
-- **Failed run log:** `results/horizon1_runbook.log` documents a Horizon 1 attempt that failed because `scripts/run_horizon1.sh` used an unsupported `--benchmarks` (plural) flag for `run_ablation.py` and `run_experiments.py`.
+- **HF-ready packages:** `dist/hf_models/{small_vla,ddpm,flow_matching,mip}/` and `dist/hf_datasets/mpc_expert_demos/`.
+- **HF card templates:** `results/hf_artifacts/` including `UPLOAD_CHECKLIST.md` and model/dataset card READMEs.
+- **Earlier failure log:** `results/horizon1_runbook.log` documents an attempt that failed due to a now-fixed CLI mismatch (`--benchmarks` plural). The current `scripts/run_horizon1.sh` uses the correct singular `--benchmark` flag.
 - **Environment provenance:** `results/env_info.json`.
 
 ### 8.3 Key Blockers
 
-1. **Missing evaluation seed files.** `data/eval_seeds_exp{001..004}.json` are required by the protocols and are currently absent.
-2. **CLI/script bugs in `scripts/run_horizon1.sh`.**
-   - Line 33: `run_ablation.py --benchmarks` must be `--benchmark`.
-   - Line 43: `run_experiments.py --benchmarks` must be `--benchmark`.
-   - Line 47: `run_experiments.py` does not accept `--horizon 16`.
-3. **Canonical runner for EXP-004** is ambiguous: `experiments/README.md` points to `run_experiments.py`, while `scripts/run_horizon1.sh` points to `scripts/run_pareto_sweep.py`.
-4. **VLA end-to-end validation** on PushT has not been completed; a local SmallVLA checkpoint exists but the quick smoke test excluded VLA because it used state-only `reaching`.
+1. **Full 100-episode EXP-001 not yet run.** The existing 25-episode run is below the pre-registered sample size and is stored in `results/exp001/` rather than the canonical `experiments/EXP-001-mechanism-ablation/outputs/`.
+2. **Missing fixed evaluation seed files.** `data/eval_seeds_exp{001..004}.json` are required by the protocols and are currently absent.
+3. **EXP-002 not started.** It depends on EXP-001 and requires VLA to be exercised end-to-end on PushT.
+4. **Canonical EXP-004 GPU Pareto sweep not started.** The CPU smoke is a placeholder/low-latency probe only.
+5. **Canonical runner ambiguity for EXP-004.** `experiments/README.md` points to `run_experiments.py`, while `scripts/run_horizon1.sh` points to `scripts/run_pareto_sweep.py`.
+6. **VLA end-to-end validation** on PushT has not been completed; a local SmallVLA checkpoint exists but the quick smoke test excluded VLA because it used state-only `reaching`.
 
 ### 8.4 Next Steps
 
-1. Generate/restore `data/eval_seeds_exp{001..004}.json`.
-2. Fix `scripts/run_horizon1.sh` CLI arguments and reconcile the EXP-004 runner.
-3. Run full EXP-001 first (it gates EXP-002/003/004).
-4. Validate SmallVLA on PushT through `run_experiments.py`.
-5. Complete packaging and upload of HF Hub models, dataset, and Gradio Spaces.
+1. Run full 100-episode × 5-seed EXP-001 to the canonical `experiments/EXP-001-mechanism-ablation/outputs/`.
+2. Generate/restore `data/eval_seeds_exp{001..004}.json`.
+3. Run EXP-002 three-family comparison (including SmallVLA on PushT).
+4. Run canonical EXP-004 GPU Pareto sweep and reconcile the runner choice.
+5. Upload HF Hub model and dataset repos (remove the dry-run `dist/hf_models/test-model/` first).
 6. Create protocol directories for EXP-009 and EXP-010.
 7. Update `docs/STATUS.md` and this section after each completed run.
 

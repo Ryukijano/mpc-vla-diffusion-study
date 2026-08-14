@@ -35,8 +35,8 @@
               "success_std": 0.0,
               "path_length": 5.442887615731886,
               "collision_rate": 0.09883040935672513,
-              "solve_time_s": 0.016443956663494394,
-              "latency_ms": 16.443956663494394,
+              "solve_time_s": 0.021501220418793855,
+              "latency_ms": 21.501220418793856,
               "mode_coverage": 0.0,
               "n_episodes": 5,
               "seed": 0
@@ -50,8 +50,8 @@
               "success_std": 0.0,
               "path_length": 5.540563382888984,
               "collision_rate": 0.10760233918128655,
-              "solve_time_s": 0.02821897938643304,
-              "latency_ms": 28.21897938643304,
+              "solve_time_s": 0.02782625720199001,
+              "latency_ms": 27.82625720199001,
               "mode_coverage": 0.0,
               "n_episodes": 5,
               "seed": 0
@@ -65,8 +65,8 @@
               "success_std": 0.0,
               "path_length": 5.434141964568992,
               "collision_rate": 0.10130718954248366,
-              "solve_time_s": 0.12220846483623915,
-              "latency_ms": 122.20846483623914,
+              "solve_time_s": 0.0795415277735884,
+              "latency_ms": 79.5415277735884,
               "mode_coverage": 0.0,
               "n_episodes": 5,
               "seed": 0
@@ -80,8 +80,8 @@
               "success_std": 0.0,
               "path_length": 5.4969135020312505,
               "collision_rate": 0.11111111111111112,
-              "solve_time_s": 0.08881737186004304,
-              "latency_ms": 88.81737186004304,
+              "solve_time_s": 0.11086096898911313,
+              "latency_ms": 110.86096898911313,
               "mode_coverage": 0.0,
               "n_episodes": 5,
               "seed": 0
@@ -95,8 +95,8 @@
               "success_std": 0.48989794855663565,
               "path_length": 66.82400862317476,
               "collision_rate": 0.04529411764705882,
-              "solve_time_s": 9.48060787848982e-06,
-              "latency_ms": 0.009480607878489821,
+              "solve_time_s": 1.6174732579612266e-05,
+              "latency_ms": 0.016174732579612265,
               "mode_coverage": 0.0,
               "n_episodes": 5,
               "seed": 0
@@ -108,10 +108,10 @@
             {
               "success_rate": 0.0,
               "success_std": 0.0,
-              "path_length": 5.531667599754729,
+              "path_length": 3.601673398351444,
               "collision_rate": 0.0,
-              "solve_time_s": 0.00521758158147956,
-              "latency_ms": 5.21758158147956,
+              "solve_time_s": 0.005225309964735061,
+              "latency_ms": 5.225309964735061,
               "mode_coverage": 0.0,
               "n_episodes": 5,
               "seed": 0
@@ -123,10 +123,10 @@
             {
               "success_rate": 0.4,
               "success_std": 0.48989794855663565,
-              "path_length": 55.110843697643624,
-              "collision_rate": 0.060952380952380945,
-              "solve_time_s": 0.00468089071268748,
-              "latency_ms": 4.68089071268748,
+              "path_length": 51.64201990401422,
+              "collision_rate": 0.0475,
+              "solve_time_s": 0.004664633023009325,
+              "latency_ms": 4.664633023009325,
               "mode_coverage": 0.0,
               "n_episodes": 5,
               "seed": 0
@@ -136,12 +136,12 @@
         "Regression Policy": {
           "seeds": [
             {
-              "success_rate": 0.0,
-              "success_std": 0.0,
-              "path_length": 111.33974451407475,
-              "collision_rate": 0.01666666666666667,
-              "solve_time_s": 7.656727063780028e-05,
-              "latency_ms": 0.07656727063780028,
+              "success_rate": 0.2,
+              "success_std": 0.4000000000000001,
+              "path_length": 54.28341274152033,
+              "collision_rate": 0.06066666666666666,
+              "solve_time_s": 7.696162397041917e-05,
+              "latency_ms": 0.07696162397041917,
               "mode_coverage": 0.0,
               "n_episodes": 5,
               "seed": 0
@@ -153,10 +153,10 @@
             {
               "success_rate": 0.0,
               "success_std": 0.0,
-              "path_length": 101.43756005487114,
-              "collision_rate": 0.0,
-              "solve_time_s": 0.00023149937701721985,
-              "latency_ms": 0.23149937701721984,
+              "path_length": 113.52874521893423,
+              "collision_rate": 0.01,
+              "solve_time_s": 0.00023181120787436763,
+              "latency_ms": 0.23181120787436763,
               "mode_coverage": 0.0,
               "n_episodes": 5,
               "seed": 0

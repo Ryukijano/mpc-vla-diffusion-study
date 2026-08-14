@@ -1,0 +1,11 @@
+benchmark,variant,success_rate_mean,success_rate_std,mode_coverage_mean,latency_ms_mean,n_seeds,n_episodes
+pusht,Full DDPM (T=100),0.016,0.032,0.016,0.8155509278566268,5,25
+pusht,DDPM no-noise (T=100),0.008,0.016,0.008,0.6820431023982227,5,25
+pusht,DDPM single-step (T=1),0.008,0.016,0.008,0.009985307379867192,5,25
+pusht,"MIP (2-iter, noise=0.1)",0.0,0.0,0.0,0.007084392197430134,5,25
+pusht,Pure Regression (RCP),0.0,0.0,0.0,0.005551917695750794,5,25
+reaching,Full DDPM (T=100),0.024,0.048,0.0,0.8148660851336977,5,25
+reaching,DDPM no-noise (T=100),0.008,0.016,0.0,0.6819242198468636,5,25
+reaching,DDPM single-step (T=1),0.0,0.0,0.0,0.009955919627100228,5,25
+reaching,"MIP (2-iter, noise=0.1)",0.21600000000000003,0.0649923072370877,0.0,0.007045479353872083,5,25
+reaching,Pure Regression (RCP),0.32799999999999996,0.07332121111929345,0.0,0.005515283680497072,5,25

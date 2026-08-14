@@ -1,95 +1,113 @@
 # Hugging Face Hub Upload Checklist
 
-This file lists the placeholder `hf upload` commands for releasing each artifact once the actual checkpoints and dataset files are available.
+This document documents the one-step upload workflow for the **MPC vs VLA vs Diffusion** study artifacts.
+
+All uploads are handled by `scripts/upload_hf_artifacts.py`, which:
+
+- Requires the `HF_TOKEN` environment variable for real uploads (exits with a clear message if not set).
+- Supports `--dry-run` to verify paths and file counts before any network call.
+- Generates `results/hf_artifacts/upload_report.json` with a per-artifact status.
 
 ## Prerequisites
 
-- [ ] Install the Hugging Face CLI / `hf` tool:
-  ```bash
-  pip install "huggingface_hub[cli]"
-  # or
-  pip install -U hf-transfer
-  ```
-- [ ] Log in with a write token for the `Ryukijano` account:
-  ```bash
-  huggingface-cli login
-  # or
-  hf login
-  ```
-- [ ] Ensure each `<path>` below is replaced with the actual local directory/file containing the artifact.
+1. Ensure the `mpc_vla` conda environment has `huggingface_hub`:
+   ```bash
+   conda run -n mpc_vla pip install -U huggingface_hub
+   ```
 
-## Models
+2. Create a Hugging Face **write** token at:
+   <https://huggingface.co/settings/tokens>
 
-### 1. SmallVLA quick checkpoint
+3. Export the token in your shell **before running the upload script**:
+   ```bash
+   export HF_TOKEN=hf_...
+   ```
 
-```bash
-hf upload Ryukijano/smallvla-mpc-vla-diffusion-quick <path> --repo-type model
-```
+   > **Security note:** Never commit the token, never pass it as a command-line argument, and never log it. The helper only reads it from the `HF_TOKEN` environment variable.
 
-**Typical upload contents:**
-- `small_vla_pusht.pt`
-- `config.yaml` (mirroring `configs/vla/small_vla.yaml`)
-- `README.md` (this model card)
-- `example_inference.py` (optional)
-
-### 2. DDPM Diffusion Policy quick checkpoint
+## Step 1 — Dry-run to verify all artifacts
 
 ```bash
-hf upload Ryukijano/ddpm-mpc-vla-diffusion-quick <path> --repo-type model
+cd /home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study
+conda run -n mpc_vla python scripts/upload_hf_artifacts.py --dry-run
 ```
 
-**Typical upload contents:**
-- `ddpm_pusht.pt`
-- `config.yaml` / `config.json`
-- `README.md` (this model card)
-- `example_inference.py` (optional)
+Expected output: a report for **4 model checkpoints**, **1 dataset**, and **1 Gradio Space**.
 
-### 3. Flow Matching Policy quick checkpoint
+## Step 2 — Upload all artifacts
+
+Run the same command without `--dry-run`:
 
 ```bash
-hf upload Ryukijano/flow-matching-mpc-vla-diffusion-quick <path> --repo-type model
+cd /home/aimsgroupuol/AIMSgeneral/Gyanateet/mpc_vla_diffusion_study
+conda run -n mpc_vla python scripts/upload_hf_artifacts.py
 ```
 
-**Typical upload contents:**
-- `flow_matching_pusht.pt`
-- `config.yaml` / `config.json`
-- `README.md` (this model card)
-- `example_inference.py` (optional)
+The script will create (or update) the following Hub repositories:
 
-### 4. Minimal Iterative Policy (MIP) quick checkpoint
+### Models (`repo_type: model`)
 
-```bash
-hf upload Ryukijano/mip-mpc-vla-diffusion-quick <path> --repo-type model
-```
+| # | Artifact | Hub repo ID | Local checkpoint | Model card |
+|---|----------|-------------|------------------|------------|
+| 1 | SmallVLA quick checkpoint | `Ryukijano/smallvla-mpc-vla-diffusion-quick` | `results/checkpoints/small_vla_pusht.pt` | `results/hf_artifacts/model_cards/smallvla-mpc-vla-diffusion-quick/README.md` |
+| 2 | DDPM Diffusion Policy quick checkpoint | `Ryukijano/ddpm-mpc-vla-diffusion-quick` | `results/checkpoints/ddpm_pusht.pt` | `results/hf_artifacts/model_cards/ddpm-mpc-vla-diffusion-quick/README.md` |
+| 3 | Flow Matching Policy quick checkpoint | `Ryukijano/flow-matching-mpc-vla-diffusion-quick` | `results/checkpoints/flow_matching_pusht.pt` | `results/hf_artifacts/model_cards/flow-matching-mpc-vla-diffusion-quick/README.md` |
+| 4 | Minimal Iterative Policy (MIP) quick checkpoint | `Ryukijano/mip-mpc-vla-diffusion-quick` | `results/checkpoints/mip_pusht.npz` | `results/hf_artifacts/model_cards/mip-mpc-vla-diffusion-quick/README.md` |
 
-**Typical upload contents:**
-- `mip_pusht.npz`
-- `config.yaml` / `config.json`
-- `README.md` (this model card)
-- `example_inference.py` (optional)
+Each model repo receives:
 
-## Datasets
+- `README.md` — the model card.
+- The checkpoint file (`.pt` or `.npz`).
+- `config.json` — extracted automatically from the checkpoint.
+- `metadata.json` — provenance from `results/checkpoints/release_manifest.json`.
 
-### 5. MPC expert demonstrations — quick test set
+### Dataset (`repo_type: dataset`)
 
-```bash
-hf upload Ryukijano/mpc-expert-demos-quick-test <path> --repo-type dataset
-```
+| # | Artifact | Hub repo ID | Local source | Dataset card |
+|---|----------|-------------|--------------|--------------|
+| 5 | MPC expert demonstrations quick test | `Ryukijano/mpc-expert-demos-quick-test` | `data/` (preferred) or `dist/hf_datasets/mpc_expert_demos` | `results/hf_artifacts/dataset_cards/mpc-expert-demos-quick-test/README.md` |
 
-**Typical upload contents:**
+Dataset repo receives:
+
+- `README.md` — the dataset card.
 - `mpc_expert_demos_state.parquet`
 - `mpc_expert_demos_state.npz`
 - `mpc_expert_demos_images.npz`
-- `README.md` (this dataset card)
-- `convert_to_lerobot.py` (optional)
+- `manifest.json` (if present in the dataset source directory)
+
+You can override the dataset source directory with:
+
+```bash
+conda run -n mpc_vla python scripts/upload_hf_artifacts.py --dataset-dir /path/to/dataset/source
+```
+
+### Gradio Space (`repo_type: space`)
+
+| # | Artifact | Hub repo ID | Local folder |
+|---|----------|-------------|--------------|
+| 6 | MPC vs VLA vs Diffusion Arena | `Ryukijano/mpc-vla-diffusion-arena` | `demo_space/` |
+
+The Space is created with `sdk: gradio` and the entire `demo_space/` folder is uploaded (ignoring `__pycache__`, `*.pyc`, `.git`, `.pytest_cache`, `*.ipynb`, and `upload_report.json`).
+
+## Step 3 — Inspect the upload report
+
+After any run (dry-run or real upload), review:
+
+```bash
+cat results/hf_artifacts/upload_report.json
+```
+
+The report contains one entry per artifact with `status`, `repo_id`, `files`, `missing_files`, and `hub_url` (when available).
+
+## Optional: Custom report path
+
+```bash
+conda run -n mpc_vla python scripts/upload_hf_artifacts.py --report /path/to/report.json
+```
 
 ## Notes
 
-- The `<path>` placeholder should be a local directory (e.g., `results/checkpoints/` or `dist/hf_datasets/mpc_expert_demos/`) that contains the files listed above.
-- Files larger than 10 MB (`.pt` and image `.npz` files) should be tracked with Git LFS. The `hf` / `huggingface-cli` upload tool handles LFS automatically for `.pt`, `.bin`, `.safetensors`, and similar extensions.
-- Alternatively, you can use the `huggingface-cli` commands:
-  ```bash
-  huggingface-cli upload Ryukijano/<repo_id> <local_path> . --repo-type model
-  huggingface-cli upload Ryukijano/<repo_id> <local_path> . --repo-type dataset
-  ```
-- **Do not upload yet** — these are local templates and the commands are intentionally placeholders until final artifacts are produced and verified.
+- The script will not upload without `HF_TOKEN`; it exits before any network call.
+- Large `.pt`/`.npz` files are automatically tracked by Git LFS by the `huggingface_hub` upload helpers.
+- If a repository already exists on the Hub, `create_repo(..., exist_ok=True)` reuses it and the script uploads a new commit.
+- Keep `HF_TOKEN` out of logs, notebooks, and version control.

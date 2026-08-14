@@ -1,0 +1,526 @@
+{
+  "experiment": "EXP-001: GCP Component Ablation",
+  "config": {
+    "benchmarks": [
+      "pusht",
+      "reaching"
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      42,
+      123
+    ],
+    "n_episodes": 25,
+    "horizon": 15,
+    "net_cfg": {
+      "hidden_dim": 64,
+      "num_layers": 2,
+      "training_epochs": 30,
+      "batch_size": 16,
+      "learning_rate": 0.01,
+      "num_demos": 50
+    }
+  },
+  "benchmarks": {
+    "pusht": {
+      "variants": {
+        "Full DDPM (T=100)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.8147385578292112,
+              "path_length": 70.28378874856405,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.08,
+              "mode_coverage": 0.08,
+              "latency_ms": 0.8189840385457501,
+              "path_length": 71.5602016688859,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.8173113299223285,
+              "path_length": 78.74241793959389,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.8140550603469212,
+              "path_length": 73.07718351012583,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.812665652638922,
+              "path_length": 97.49620290728218,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        },
+        "DDPM no-noise (T=100)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.6837724391371012,
+              "path_length": 71.9641460220278,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.04,
+              "mode_coverage": 0.04,
+              "latency_ms": 0.6829938383261656,
+              "path_length": 73.67346838273593,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.6834643413312733,
+              "path_length": 78.84172087182556,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.6775926013166707,
+              "path_length": 72.70581459754823,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.6823922918799024,
+              "path_length": 94.37556030689386,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        },
+        "DDPM single-step (T=1)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.009998813737183808,
+              "path_length": 3.806961335645651,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.009970463501910368,
+              "path_length": 3.967426698277089,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.010027318261563778,
+              "path_length": 3.7090035500652414,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.04,
+              "mode_coverage": 0.04,
+              "latency_ms": 0.009917138575541752,
+              "path_length": 3.40856530956443,
+              "collision_rate": 0.003333333333333333,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.010012802823136251,
+              "path_length": 3.877429660860741,
+              "collision_rate": 0.004666666666666667,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        },
+        "MIP (2-iter, noise=0.1)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.007111403159797192,
+              "path_length": 123.64340714086983,
+              "collision_rate": 0.009333333333333334,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.007098475471138955,
+              "path_length": 121.1506182413925,
+              "collision_rate": 0.01,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.007093987582872312,
+              "path_length": 122.9186022665935,
+              "collision_rate": 0.012,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.0070516704581677905,
+              "path_length": 124.26708270607796,
+              "collision_rate": 0.012,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.007066424315174421,
+              "path_length": 124.14733846489553,
+              "collision_rate": 0.012000000000000002,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        },
+        "Pure Regression (RCP)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.005545513859639566,
+              "path_length": 125.09058940220875,
+              "collision_rate": 0.011333333333333336,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.005552753185232481,
+              "path_length": 125.15790027001894,
+              "collision_rate": 0.011333333333333336,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.005571163725107908,
+              "path_length": 124.80375826459608,
+              "collision_rate": 0.010666666666666666,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.005552642823507389,
+              "path_length": 123.74274997469963,
+              "collision_rate": 0.014000000000000002,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.0055375148852666225,
+              "path_length": 125.15790027001894,
+              "collision_rate": 0.012666666666666668,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        }
+      }
+    },
+    "reaching": {
+      "variants": {
+        "Full DDPM (T=100)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.8157651640164354,
+              "path_length": 111.36896019987506,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.12,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.8124962591901224,
+              "path_length": 34.54803213059374,
+              "collision_rate": 0.031121693121693123,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.813587488140911,
+              "path_length": 88.17732697090709,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.8152348501607776,
+              "path_length": 80.77416169354252,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.8172466641602418,
+              "path_length": 120.0369892300555,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        },
+        "DDPM no-noise (T=100)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.681323588360101,
+              "path_length": 110.43958637969641,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.04,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.6833437239509766,
+              "path_length": 32.08422295930577,
+              "collision_rate": 0.025777777777777778,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.6818738433842859,
+              "path_length": 88.46058797926408,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.6818234065237145,
+              "path_length": 80.3394773858004,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.6812565370152395,
+              "path_length": 118.84852674448001,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        },
+        "DDPM single-step (T=1)": {
+          "seeds": [
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.009963068024565775,
+              "path_length": 3.816889101984158,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.00999715970829129,
+              "path_length": 3.9779830396794638,
+              "collision_rate": 0.013333333333333334,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.009958459995687008,
+              "path_length": 3.689703128579184,
+              "collision_rate": 0.0,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.00991733046248555,
+              "path_length": 3.6392703404121995,
+              "collision_rate": 0.006666666666666666,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.0,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.009943579944471518,
+              "path_length": 3.876643809978412,
+              "collision_rate": 0.012,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        },
+        "MIP (2-iter, noise=0.1)": {
+          "seeds": [
+            {
+              "success_rate": 0.16,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.007016797227641711,
+              "path_length": 105.21762400790998,
+              "collision_rate": 0.039794871794871796,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.28,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.0071067539753303655,
+              "path_length": 89.6262689581151,
+              "collision_rate": 0.04038095238095238,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.12,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.00705767212769924,
+              "path_length": 109.64316537666593,
+              "collision_rate": 0.039794871794871796,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.28,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.007078695540817884,
+              "path_length": 91.27038522867207,
+              "collision_rate": 0.050102564102564105,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.24,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.006967477897871217,
+              "path_length": 95.66270903516903,
+              "collision_rate": 0.04325274725274726,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        },
+        "Pure Regression (RCP)": {
+          "seeds": [
+            {
+              "success_rate": 0.4,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.005494020425547392,
+              "path_length": 77.29735331300631,
+              "collision_rate": 0.06282051282051283,
+              "n_episodes": 25,
+              "seed": 0
+            },
+            {
+              "success_rate": 0.36,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.005559874161218222,
+              "path_length": 82.05218829610169,
+              "collision_rate": 0.05466666666666667,
+              "n_episodes": 25,
+              "seed": 1
+            },
+            {
+              "success_rate": 0.24,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.005543583538383245,
+              "path_length": 96.44370809959561,
+              "collision_rate": 0.05076923076923077,
+              "n_episodes": 25,
+              "seed": 2
+            },
+            {
+              "success_rate": 0.4,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.0054858693590339935,
+              "path_length": 77.21719637734982,
+              "collision_rate": 0.05600000000000001,
+              "n_episodes": 25,
+              "seed": 42
+            },
+            {
+              "success_rate": 0.24,
+              "mode_coverage": 0.0,
+              "latency_ms": 0.005493070918302505,
+              "path_length": 95.90732958659875,
+              "collision_rate": 0.04220512820512821,
+              "n_episodes": 25,
+              "seed": 123
+            }
+          ]
+        }
+      }
+    }
+  }
+}

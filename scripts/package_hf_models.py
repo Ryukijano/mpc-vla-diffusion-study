@@ -787,6 +787,107 @@ print("MIP action trajectory:", actions.shape)
 # ===========================================================================
 # Main
 # ===========================================================================
+def package_single_dry_run(
+    checkpoint_path: str,
+    repo_id: str,
+    output_dir: str,
+    dry_run: bool = False,
+) -> str:
+    """Package a single checkpoint into a local Hugging Face model repository.
+
+    If *checkpoint_path* does not exist, a tiny placeholder .pt file is created
+    so the README / model card generation can be exercised without a real
+    trained checkpoint.
+    """
+    repo_name = repo_id.split("/")[-1]
+    pkg_dir = os.path.join(output_dir, repo_name)
+    os.makedirs(pkg_dir, exist_ok=True)
+
+    print(f"\n[Dry-Run] Packaging single model for repo '{repo_id}' into {pkg_dir}...")
+
+    # Ensure a checkpoint exists for the dry-run
+    if not os.path.exists(checkpoint_path):
+        os.makedirs(os.path.dirname(checkpoint_path), exist_ok=True)
+        torch.save(
+            {
+                "state_dict": {},
+                "config": {},
+                "metadata": {
+                    "repo_id": repo_id,
+                    "note": "placeholder checkpoint for HF packaging dry-run",
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                },
+            },
+            checkpoint_path,
+        )
+        print(f"  Created placeholder checkpoint: {checkpoint_path}")
+
+    dest_ckpt = os.path.join(pkg_dir, os.path.basename(checkpoint_path))
+    if checkpoint_path != dest_ckpt:
+        with open(checkpoint_path, "rb") as src, open(dest_ckpt, "wb") as dst:
+            dst.write(src.read())
+        print(f"  Copied checkpoint: {dest_ckpt}")
+
+    # Generic model card
+    readme_content = f"""---
+title: \"{repo_name} — MPC vs VLA vs Diffusion Study\"
+language: en
+license: mit
+library_name: pytorch
+pipeline_tag: robotics
+tags:
+  - robotics
+  - robot-learning
+  - imitation-learning
+  - reaching-task
+---
+
+# 🤖 {repo_name}
+
+This is a **dry-run / placeholder** model package for the pre-registered study:
+**\"MPC vs VLA vs Diffusion: An Open-Source Study of Robot Control Families\"**
+([GitHub](https://github.com/Ryukijano/mpc-vla-diffusion-study)).
+
+## 📦 Package contents
+
+| File | Purpose |
+|---|---|
+| `{os.path.basename(checkpoint_path)}` | Model checkpoint (placeholder for dry-run) |
+| `config.yaml` | Minimal configuration stub |
+| `README.md` | This model card |
+
+## 🚀 Quickstart
+
+```python
+import torch
+ckpt = torch.load('{os.path.basename(checkpoint_path)}', map_location='cpu')
+print('Checkpoint keys:', ckpt.keys())
+```
+
+## 📜 Citation
+
+```bibtex
+@misc{{mpc_vla_diffusion_study_2026,
+  title        = {{MPC vs VLA vs Diffusion: An Open-Source Study of Robot Control Families}},
+  author       = {{Gyanateet and Devin AI}},
+  year         = {{2026}},
+  howpublished = {{\\url{{https://github.com/Ryukijano/mpc-vla-diffusion-study}}}}
+}}
+```
+"""
+    readme_path = os.path.join(pkg_dir, "README.md")
+    with open(readme_path, "w") as f:
+        f.write(readme_content)
+    print(f"  Generated model card: {readme_path}")
+
+    config_path = os.path.join(pkg_dir, "config.yaml")
+    with open(config_path, "w") as f:
+        yaml.dump({"repo_id": repo_id, "dry_run": dry_run}, f, default_flow_style=False)
+    print(f"  Generated config: {config_path}")
+
+    return pkg_dir
+
+
 def main():
     parser = argparse.ArgumentParser(description="Package Hugging Face model artifacts.")
     parser.add_argument(
@@ -800,6 +901,22 @@ def main():
         default=True,
         help="Run inference dry-run validation on created checkpoints.",
     )
+    parser.add_argument(
+        "--checkpoint",
+        default=None,
+        help="Path to a single model checkpoint to package (enables single-repo dry-run mode).",
+    )
+    parser.add_argument(
+        "--repo-id",
+        default=None,
+        help="Target Hugging Face repo ID for the single checkpoint (e.g., user/model-name).",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Generate local package only; do not upload to Hugging Face Hub.",
+    )
     args = parser.parse_args()
 
     print("=" * 72)
@@ -808,6 +925,13 @@ def main():
     print("=" * 72)
 
     os.makedirs(args.output_dir, exist_ok=True)
+
+    if args.checkpoint and args.repo_id:
+        package_single_dry_run(args.checkpoint, args.repo_id, args.output_dir, dry_run=args.dry_run)
+        print("\n" + "=" * 72)
+        print("Single-model dry-run packaging complete!")
+        print("=" * 72)
+        return
 
     pkg_vla = package_small_vla(args.output_dir, verify=args.verify)
     pkg_ddpm = package_ddpm(args.output_dir, verify=args.verify)

@@ -1,4 +1,5 @@
 ---
+title: "SmallVLA quick checkpoint — MPC vs VLA vs Diffusion study"
 language: en
 license: mit
 library_name: pytorch

@@ -100,10 +100,7 @@ class _FallbackReaching:
             ]
             self.name = "Reaching (Cluttered)"
         else:
-            self.obstacles = [
-                CircleObstacle([2.0, 2.0], 0.5),
-                CircleObstacle([3.0, 1.0], 0.4),
-            ]
+            self.obstacles = []
         self.world = SDFWorld(dim=2)
         for obs in self.obstacles:
             self.world.add_sphere(obs.center.tolist(), obs.radius)
@@ -163,7 +160,7 @@ class _FallbackPushT:
         ]
         self.goal = self.goals[0]
         self.start = np.zeros(4)
-        self.obstacles = [CircleObstacle([2.0, 2.0], 0.3)]
+        self.obstacles = []
         self.world = SDFWorld(dim=2)
         for obs in self.obstacles:
             self.world.add_sphere(obs.center.tolist(), obs.radius)
@@ -857,27 +854,25 @@ def run_pareto_cpu_low_latency(
                 "policy_fn": lambda s, _m=_m, _r=ref: _m.solve(s, _r).control,
             }
 
-        # Nonlinear MPC / iLQR sweep (one object per condition to avoid warm-start cross-talk)
+        # Nonlinear (collision-free) MPC / iLQR sweep
         for it in (1, 3, 5, 10, 15):
             c_name = f"Nonlinear MPC (iters={it})"
-            nmpc = NonlinearMPC(
+            nmpc = CollisionFreeMPC(
                 bench.dyn.dynamics,
                 stage_cost,
                 terminal_cost,
+                bench.world,
                 horizon=horizon,
                 u_bounds=u_bounds,
+                collision_weight=100.0,
+                ilqr_iters=it,
             )
-            _it = it
             conditions_dict[c_name] = {
                 "family": "Nonlinear MPC",
                 "category": "Nonlinear MPC",
                 "parameter": f"iters={it}",
-                "profile_fn": lambda _m=nmpc, _s=sample_state, _it=_it: _m.solve(
-                    _s, max_iter=_it
-                )["action"],
-                "policy_fn": lambda s, _m=nmpc, _it=_it: _m.solve(s, max_iter=_it)[
-                    "action"
-                ],
+                "profile_fn": lambda _m=nmpc, _s=sample_state: _m.solve(_s)[0],
+                "policy_fn": lambda s, _m=nmpc: _m.solve(s)[0],
             }
 
         # Add learned baselines

@@ -53,6 +53,24 @@ The full protocol is large: ~80,000 evaluation episodes plus 210,000 dedicated l
 
 ---
 
+## What the recent literature says
+
+Before we look at our own numbers, it helps to situate them against the most relevant recent work. We focus on the papers that directly inform our ablations, baselines, and sim-to-real plans.
+
+- **Simchowitz et al., "Much Ado About Noising" (2025, arXiv:2512.01809)** — the core motivation for our GCP ablation (EXP-001). They argue that iterative compute plus stochastic injection, not multi-modal action distribution fitting, explains the success of diffusion/flow policies, and back it with a Minimal Iterative Policy that we include as a baseline.
+
+- **OpenVLA (Kim et al., 2025)** — our main VLA comparison point in EXP-002/EXP-003. It shows that a 7B-parameter open-source VLA can outperform much larger closed models after fine-tuning, setting the bar for what scaled vision-language pretraining can do in manipulation.
+
+- **FlowMPC (Hamel, 2026)** — a hybrid world-model + flow policy that uses MPPI at test time. It is a useful north star for our own diffusion-warm-start MPC and WAM experiments (EXP-005/EXP-007), because it suggests learned priors gain more from explicit planning than from action distribution modeling alone.
+
+- **πR²: Reactive Real-time Flow Policies (2026)** — attacks the latency of action-chunking flow policies with latency-adaptive schedules and fast/slow conditioning. It directly motivates our Pareto analysis in EXP-004 by showing that the diffusion/flow family can be made real-time with the right architecture.
+
+- **BIFROST (2026)** — a sim-to-real method that learns invariant history representations through cross-domain bisimulation. It frames the OOD/generalization question we will stress in EXP-006/EXP-008, where we test photorealistic rendering, domain randomization, and real-robot vision.
+
+Taken together, these papers define the frontier we are trying to map: cheaper iterative policies, scalable VLAs, planning-augmented flow, latency-aware generation, and invariant sim-to-real representations. Our Horizon 1 experiments are designed to pit these ideas against each other on a shared harness.
+
+---
+
 ## 4. Quick smoke-test results
 
 Before scaling to the full protocol, we ran a fast smoke test to verify the harness. This used one seed, five episodes, tiny networks (hidden dim 16, 10 training epochs, 10 demonstrations), and a single 2-D reaching benchmark. The command is:
@@ -77,6 +95,10 @@ The aggregated master comparison table is at [`results/quick_test/report/master_
 | Iterative Regression Policy | 0.2 ± 0.0 | 85.58 | 0.048 | 8.51 |
 
 *Table 1: Smoke-test results on 2-D reaching. n = 1 seed, 5 episodes per method.*
+
+*The full Horizon 1 EXP-002 three-family comparison (PushT, 2-D/3-D reaching, cluttered reaching) will replace the smoke-test table above:*
+
+<!-- EXP-002 TABLE INSERT -->
 
 ![success rate](results/quick_test/report/figures/comparison_success_rate.png)
 *Figure 1: Success rate in the quick test. Note the tiny sample size.*

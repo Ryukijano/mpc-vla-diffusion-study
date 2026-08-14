@@ -990,46 +990,59 @@ def run_experiment(args):
 
         bench_results = {"controllers": {}}
 
+        # --- Phase 1: Collect demonstrations once (deterministic, seed 0) ---
+        print("\n  Phase 1: Collecting demonstrations from MPC expert...")
+        bench_0 = _make_benchmark(bench_name, seed=0)
+        demos = []
+        if "mpc" in ctrl_families or "diffusion" in ctrl_families:
+            demos = collect_demonstrations(
+                bench_0, n_demos=n_demos, horizon=horizon,
+                u_bounds=u_bounds, seed=0,
+            )
+
+        # --- Phase 2: Train learning-based controllers once ---
+        print("\n  Phase 2: Training learning-based controllers...")
+        learning_controllers = {}
+        if "diffusion" in ctrl_families or "vla" in ctrl_families:
+            learning_controllers = train_learning_controllers(
+                demos, bench_0, horizon, net_cfg, seed=0,
+            )
+
+        # --- Build MPC controllers once ---
+        mpc_controllers = {}
+        if "mpc" in ctrl_families:
+            print("\n  Building MPC controllers...")
+            mpc_controllers = build_mpc_controllers(
+                bench_0, horizon, u_bounds,
+                ilqr_iters=net_cfg.get("ilqr_iters", 15),
+            )
+
+        # --- Merge all controllers ---
+        all_controllers = {}
+        all_controllers.update(mpc_controllers)
+        all_controllers.update(learning_controllers)
+
+        if not all_controllers:
+            print("  [WARNING] No controllers available — skipping benchmark")
+            continue
+
+        # --- Phase 3: Evaluate across seeds ---
         for seed in seeds:
             print(f"\n  [Seed {seed}]")
             bench = _make_benchmark(bench_name, seed=seed)
 
-            # --- Phase 1: Collect demonstrations ---
-            print(f"\n  Phase 1: Collecting demonstrations from MPC expert...")
-            demos = []
-            if "mpc" in ctrl_families or "diffusion" in ctrl_families:
-                demos = collect_demonstrations(
-                    bench, n_demos=n_demos, horizon=horizon,
-                    u_bounds=u_bounds, seed=seed,
-                )
-
-            # --- Phase 2: Train learning-based controllers ---
-            print(f"\n  Phase 2: Training learning-based controllers...")
-            learning_controllers = {}
-            if "diffusion" in ctrl_families or "vla" in ctrl_families:
-                learning_controllers = train_learning_controllers(
-                    demos, bench, horizon, net_cfg, seed=seed,
-                )
-
-            # --- Build MPC controllers ---
-            mpc_controllers = {}
+            # Rebuild MPC for each seed because some solvers cache previous solutions
+            # or hold state from previous rollouts.
             if "mpc" in ctrl_families:
-                print(f"\n  Building MPC controllers...")
+                print("    [rebuilding] MPC controllers for fresh seed...")
                 mpc_controllers = build_mpc_controllers(
                     bench, horizon, u_bounds,
                     ilqr_iters=net_cfg.get("ilqr_iters", 15),
                 )
+                all_controllers = {}
+                all_controllers.update(mpc_controllers)
+                all_controllers.update(learning_controllers)
 
-            # --- Merge all controllers ---
-            all_controllers = {}
-            all_controllers.update(mpc_controllers)
-            all_controllers.update(learning_controllers)
-
-            if not all_controllers:
-                print("  [WARNING] No controllers available — skipping benchmark")
-                continue
-
-            # --- Phase 3: Evaluate ALL controllers ---
             print(f"\n  Phase 3: Evaluating {len(all_controllers)} controllers "
                   f"on {n_episodes} episodes...")
             seed_results = evaluate_controllers(

@@ -50,6 +50,7 @@ def collect_and_package_dataset(
     max_steps: int = 60,
     image_size: int = 64,
     verify: bool = True,
+    dry_run: bool = False,
 ) -> str:
     """Collect expert demonstrations and format into .npz and .parquet packages."""
     os.makedirs(output_dir, exist_ok=True)
@@ -59,8 +60,190 @@ def collect_and_package_dataset(
     print("=" * 72)
     print("Hugging Face Dataset Artifact Packager")
     print(f"Target Output Directory: {output_dir}")
+    if dry_run:
+        print("Mode: DRY-RUN (synthetic data, no MPC rollouts)")
     print(f"Episodes: {n_episodes}, Max Steps: {max_steps}, Image Size: {image_size}")
     print("=" * 72)
+
+    # -----------------------------------------------------------------------
+    # Dry-run shortcut: generate a tiny synthetic dataset without collecting
+    # -----------------------------------------------------------------------
+    if dry_run:
+        rng = np.random.RandomState(42)
+        total = max(n_episodes * max_steps, 4)
+        obs_arr = rng.randn(total, 4).astype(np.float32)
+        act_arr = rng.randn(total, 2).astype(np.float32)
+        nobs_arr = obs_arr + 0.1 * act_arr
+        rew_arr = -np.linalg.norm(obs_arr[:, :2], axis=1).astype(np.float32)
+        done_arr = np.zeros(total, dtype=bool)
+        steps_per_ep = max(1, total // n_episodes)
+        for i in range(1, n_episodes + 1):
+            idx = min(i * steps_per_ep - 1, total - 1)
+            done_arr[idx] = True
+
+        npz_state_path = os.path.join(output_dir, "mpc_expert_demos_state.npz")
+        np.savez(
+            npz_state_path,
+            observations=obs_arr,
+            actions=act_arr,
+            next_observations=nobs_arr,
+            rewards=rew_arr,
+            dones=done_arr,
+        )
+        np.savez(
+            os.path.join(data_dir, "mpc_expert_demos_state.npz"),
+            observations=obs_arr,
+            actions=act_arr,
+            next_observations=nobs_arr,
+            rewards=rew_arr,
+            dones=done_arr,
+        )
+        print(f"  Saved state .npz: {npz_state_path} ({os.path.getsize(npz_state_path):,} bytes, {total} transitions)")
+
+        parquet_rows = []
+        ep_id = 0
+        step_id = 0
+        for i in range(total):
+            parquet_rows.append(
+                {
+                    "episode_id": ep_id,
+                    "step_id": step_id,
+                    "obs_x": float(obs_arr[i, 0]),
+                    "obs_y": float(obs_arr[i, 1]),
+                    "obs_vx": float(obs_arr[i, 2]),
+                    "obs_vy": float(obs_arr[i, 3]),
+                    "action_ax": float(act_arr[i, 0]),
+                    "action_ay": float(act_arr[i, 1]),
+                    "next_obs_x": float(nobs_arr[i, 0]),
+                    "next_obs_y": float(nobs_arr[i, 1]),
+                    "next_obs_vx": float(nobs_arr[i, 2]),
+                    "next_obs_vy": float(nobs_arr[i, 3]),
+                    "reward": float(rew_arr[i]),
+                    "done": bool(done_arr[i]),
+                }
+            )
+            step_id += 1
+            if done_arr[i]:
+                ep_id += 1
+                step_id = 0
+
+        df_parquet = pd.DataFrame(parquet_rows)
+        parquet_path = os.path.join(output_dir, "mpc_expert_demos_state.parquet")
+        df_parquet.to_parquet(parquet_path, engine="pyarrow", index=False)
+        df_parquet.to_parquet(os.path.join(data_dir, "mpc_expert_demos_state.parquet"), engine="pyarrow", index=False)
+        print(f"  Saved Parquet table: {parquet_path} ({os.path.getsize(parquet_path):,} bytes, {len(df_parquet)} rows)")
+
+        # Synthetic image dataset
+        img_arr = rng.randint(0, 255, size=(min(total, 8), image_size, image_size, 3), dtype=np.uint8)
+        npz_img_path = os.path.join(output_dir, "mpc_expert_demos_images.npz")
+        np.savez(
+            npz_img_path,
+            observations=img_arr,
+            actions=act_arr[: len(img_arr)],
+            next_observations=img_arr,
+            rewards=rew_arr[: len(img_arr)],
+            dones=done_arr[: len(img_arr)],
+        )
+        np.savez(
+            os.path.join(data_dir, "mpc_expert_demos_images.npz"),
+            observations=img_arr,
+            actions=act_arr[: len(img_arr)],
+            next_observations=img_arr,
+            rewards=rew_arr[: len(img_arr)],
+            dones=done_arr[: len(img_arr)],
+        )
+        print(f"  Saved image .npz: {npz_img_path} ({os.path.getsize(npz_img_path):,} bytes, {len(img_arr)} frames)")
+
+        # Dataset Card
+        readme_content = f"""---
+title: "MPC Expert Demonstrations — Benchmark Dataset"
+language: en
+license: mit
+tags:
+  - robotics
+  - robot-learning
+  - imitation-learning
+  - demonstrations
+  - mpc
+  - collision-free-mpc
+  - reaching-task
+  - pusht
+  - npz
+  - parquet
+  - lerobot
+configs:
+  - config_name: reaching_state
+    data_files: "mpc_expert_demos_state.parquet"
+task_categories:
+  - robot-learning
+size_categories:
+  - n<1K
+---
+
+# 📦 MPC Expert Demonstrations Dataset
+
+This is a **dry-run / synthetic** dataset package generated to verify Hugging Face dataset card and metadata creation for the study:
+**"MPC vs VLA vs Diffusion: An Open-Source Study of Robot Control Families"**
+([GitHub Repository](https://github.com/Ryukijano/mpc-vla-diffusion-study)).
+
+## 🌟 Dataset Summary
+
+- **Mode**: Dry-run (synthetic data, no environment rollouts).
+- **Formats Provided**:
+  1. `mpc_expert_demos_state.parquet`: Structured columnar tabular format.
+  2. `mpc_expert_demos_state.npz`: NumPy archive with keys `observations`, `actions`, `next_observations`, `rewards`, `dones`.
+  3. `mpc_expert_demos_images.npz`: Multimodal image observation dataset ($64 \\times 64 \\times 3$ RGB) stubs.
+
+## 🚀 How to Load the Dataset
+
+### Using Pandas / PyArrow (Parquet)
+```python
+import pandas as pd
+
+df = pd.read_parquet("mpc_expert_demos_state.parquet")
+print("Total transitions:", len(df))
+print(df.head())
+```
+
+### Using NumPy (.npz)
+```python
+import numpy as np
+
+data = np.load("mpc_expert_demos_state.npz")
+print("Observations shape:", data["observations"].shape)
+print("Actions shape:", data["actions"].shape)
+```
+
+## 📜 Citation
+
+```bibtex
+@misc{{mpc_vla_diffusion_study_2026,
+  title        = {{MPC vs VLA vs Diffusion: An Open-Source Study of Robot Control Families}},
+  author       = {{Gyanateet and Devin AI}},
+  year         = {{2026}},
+  howpublished = {{\\url{{https://github.com/Ryukijano/mpc-vla-diffusion-study}}}}
+}}
+```
+"""
+        readme_path = os.path.join(output_dir, "README.md")
+        with open(readme_path, "w") as f:
+            f.write(readme_content)
+        print(f"  Generated dataset card: {readme_path}")
+
+        if verify:
+            print("\n[Verify] Validating dry-run dataset artifacts...")
+            df_check = pd.read_parquet(parquet_path)
+            assert len(df_check) > 0, "Empty parquet file!"
+            assert "obs_x" in df_check.columns and "action_ax" in df_check.columns
+            npz_check = np.load(npz_state_path)
+            assert "observations" in npz_check and "actions" in npz_check
+            assert len(npz_check["observations"]) == len(df_check)
+            print("  [Verify PASS] Dry-run dataset artifacts loaded and verified successfully!")
+
+        print("\n" + "=" * 72)
+        print(f"Dataset dry-run packaging complete in {output_dir}!")
+        print("=" * 72)
+        return output_dir
 
     # 1. Initialize Reaching Environment with Obstacles
     obstacles = [
@@ -373,6 +556,12 @@ def main():
         default=True,
         help="Verify created dataset files.",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Generate a synthetic dataset and card only; do not roll out the environment.",
+    )
     args = parser.parse_args()
 
     collect_and_package_dataset(
@@ -380,6 +569,7 @@ def main():
         n_episodes=args.n_episodes,
         max_steps=args.max_steps,
         verify=args.verify,
+        dry_run=args.dry_run,
     )
 
 
