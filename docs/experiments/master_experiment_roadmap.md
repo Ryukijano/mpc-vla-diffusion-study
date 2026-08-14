@@ -703,3 +703,50 @@ All generated assets are structured for direct publication on the Hugging Face H
 ---
 
 *This master document stands as the canonical execution blueprint for the entire study. All subsequent experiment runs, data serializations, and publications must cross-reference this roadmap.*
+
+---
+
+## 8. Current Execution Status
+
+> **Live tracker:** See `docs/STATUS.md` for the full, up-to-date execution state. The summary below is current as of 2026-08-14.
+
+### 8.1 Overall State
+
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| EXP-001 — GCP Mechanism Ablation | **In-progress / partial** | Quick smoke test on 2-D Reaching only (`results/quick_test/ablation/`); full 5-condition × 2-benchmark run not yet completed. |
+| EXP-002 — Three-Family Comparison | **In-progress / partial** | Quick smoke test on 2-D Reaching only, `mpc` + `diffusion` (no VLA); full run not completed. |
+| EXP-003 — OOD Robustness | **Pending** | No outputs. |
+| EXP-004 — Latency-Performance Pareto | **Pending** | Only quick-smoke Pareto figure exists. |
+| EXP-005..010 — Horizon 2 | **Pending** | Protocol dirs for EXP-005–008 exist; EXP-009 and EXP-010 not yet created. |
+| Model Checkpoints | **Partial** | Four PushT baseline checkpoints verified in `results/checkpoints/`; full per-experiment checkpoint trees missing. |
+| Hugging Face Hub Artifacts | **Pending** | Packaging scripts exist but no repos created or uploaded. |
+| HF Community Blog | **Draft / blocked** | Draft at `docs/blogging/hf_blog_draft.md`; publication waiting on full Horizon 1 results and Hub artifacts. |
+
+### 8.2 What Is Already on Disk
+
+- **Quick smoke-test results:** `results/quick_test/` (1 seed, 5 episodes, `reaching` only, `mpc` + `diffusion` controllers).
+- **Baseline checkpoints:** `results/checkpoints/{small_vla_pusht.pt, ddpm_pusht.pt, flow_matching_pusht.pt, mip_pusht.npz}` with `release_manifest.json`.
+- **Failed run log:** `results/horizon1_runbook.log` documents a Horizon 1 attempt that failed because `scripts/run_horizon1.sh` used an unsupported `--benchmarks` (plural) flag for `run_ablation.py` and `run_experiments.py`.
+- **Environment provenance:** `results/env_info.json`.
+
+### 8.3 Key Blockers
+
+1. **Missing evaluation seed files.** `data/eval_seeds_exp{001..004}.json` are required by the protocols and are currently absent.
+2. **CLI/script bugs in `scripts/run_horizon1.sh`.**
+   - Line 33: `run_ablation.py --benchmarks` must be `--benchmark`.
+   - Line 43: `run_experiments.py --benchmarks` must be `--benchmark`.
+   - Line 47: `run_experiments.py` does not accept `--horizon 16`.
+3. **Canonical runner for EXP-004** is ambiguous: `experiments/README.md` points to `run_experiments.py`, while `scripts/run_horizon1.sh` points to `scripts/run_pareto_sweep.py`.
+4. **VLA end-to-end validation** on PushT has not been completed; a local SmallVLA checkpoint exists but the quick smoke test excluded VLA because it used state-only `reaching`.
+
+### 8.4 Next Steps
+
+1. Generate/restore `data/eval_seeds_exp{001..004}.json`.
+2. Fix `scripts/run_horizon1.sh` CLI arguments and reconcile the EXP-004 runner.
+3. Run full EXP-001 first (it gates EXP-002/003/004).
+4. Validate SmallVLA on PushT through `run_experiments.py`.
+5. Complete packaging and upload of HF Hub models, dataset, and Gradio Spaces.
+6. Create protocol directories for EXP-009 and EXP-010.
+7. Update `docs/STATUS.md` and this section after each completed run.
+
